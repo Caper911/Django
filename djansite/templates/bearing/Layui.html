@@ -3,7 +3,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-  
+    {% load staticfiles %}
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title>工控数据展示</title>
     <meta name="renderer" content="webkit">
@@ -13,11 +13,11 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
   
-    <link rel="stylesheet" href="./Layui_files/layui.css" media="all">
-    <script type="text/javascript" async="" charset="utf-8" src="./Layui_files/core.php"></script>
-    <script src="highcharts/code/highcharts.js"></script>
-    <script src="highcharts/code/modules/exporting.js"></script>
-    <script src="../../code/modules/exporting.js"></script>
+    <link rel="stylesheet" href="{% static 'layui_files/layui.css' %}" media="all">
+    
+    <script type="text/javascript" async="" charset="utf-8" src="{% static 'layui_files/core.php' %}"></script>
+    <script src="{% static 'highcharts/code/highcharts.js' %}"></script>
+    <script src="{% static 'highcharts/code/modules/exporting.js' %}"></script>
   </head>
 
 <body class="layui-layout-body">
@@ -102,7 +102,7 @@
     © 由 layui.com 强力驱动
   </div>
 </div>
-<script src="./Layui_files/layui.js" charset="utf-8"></script>
+<script src="{% static 'layui_files/layui.js' %}" charset="utf-8"></script>
 <script>
 //JavaScript代码区域
 layui.use('element', function(){
@@ -117,7 +117,7 @@ document.write(unescape("%3Cspan id='cnzz_stat_icon_30088308'%3E%3C/span%3E%3Csc
 </script>
 <span id="cnzz_stat_icon_30088308"></span>
 
-<script src="./Layui_files/c.php" type="text/javascript"></script>
+<script src=" {% static 'layui_files/c.php' %}" type="text/javascript"></script>
 
 <script>
 Highcharts.chart('container', {
