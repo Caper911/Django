@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"> <title>开始使用layui</title>
+        <link rel="stylesheet" href="layui/css/layui.css">
+    </head>
+    <script src="highcharts/code/highcharts.js"></script>
+    <script src="highcharts/code/modules/exporting.js"></script>
+    <body>
+        <div class="layui-layout layui-layout-admin">
+            <div class="layui-header header header-demo">
+                <div class="layui-main">
+
+                        <ul class="layui-nav" >
+                            <li class="layui-nav-item"><a href="">最新活动</a></li>
+                            <li class="layui-nav-item layui-this"><a href="">产品</a></li>
+                            <li class="layui-nav-item"><a href="">大数据</a></li>
+                            <li class="layui-nav-item">
+                            <a href="javascript:;">解决方案</a>
+                                <dl class="layui-nav-child"> <!-- 二级菜单 -->
+                                    <dd><a href="">移动模块</a></dd>
+                                    <dd><a href="">后台模版</a></dd>
+                                    <dd><a href="">电商平台</a></dd>
+                                </dl>
+                            </li>
+                            <li class="layui-nav-item"><a href="">社区</a></li>
+                        </ul>
+                        <div id="container" style="min-width: 310px; max-width: 800px; height: 400px; margin: 0 auto"></div>
+                </div>
+            </div>
+        </div>
+        <script src="layui/layui.js">
+        </script>
+        <script>//一般直接写在一个js文件中
+        layui.use(['layer', 'form'], function(){
+
+            var layer = layui.layer
+            ,form = layui.form;
+
+            layer.msg('Hey,You are gay.');
+        });
+        //注意：导航 依赖 element 模块，否则无法进行功能性操作
+        layui.use('element', function(){
+            var element = layui.element;
+        });
+        </script>
+        <script type="text/javascript">
+            
+            Highcharts.chart('container', {
+                chart: {
+                    type: 'bar'
+                },
+                title: {
+                    text: 'Historic World Population by Region'
+                },
+                subtitle: {
+                    text: 'Source: <a href="https://en.wikipedia.org/wiki/World_population">Wikipedia.org</a>'
+                },
+                xAxis: {
+                    categories: ['Africa', 'America', 'Asia', 'Europe', 'Oceania'],
+                    title: {
+                        text: null
+                    }
+                },
+                yAxis: {
+                    min: 0,
+                    title: {
+                        text: 'Population (millions)',
+                        align: 'high'
+                    },
+                    labels: {
+                        overflow: 'justify'
+                    }
+                },
+                tooltip: {
+                    valueSuffix: ' millions'
+                },
+                plotOptions: {
+                    bar: {
+                        dataLabels: {
+                            enabled: true
+                        }
+                    }
+                },
+                legend: {
+                    layout: 'vertical',
+                    align: 'right',
+                    verticalAlign: 'top',
+                    x: -40,
+                    y: 80,
+                    floating: true,
+                    borderWidth: 1,
+                    backgroundColor: ((Highcharts.theme && Highcharts.theme.legendBackgroundColor) || '#FFFFFF'),
+                    shadow: true
+                },
+                credits: {
+                    enabled: false
+                },
+                series: [{
+                    name: 'Year 1800',
+                    data: [107, 31, 635, 203, 2]
+                }, {
+                    name: 'Year 1900',
+                    data: [133, 156, 947, 408, 6]
+                }, {
+                    name: 'Year 2012',
+                    data: [1052, 954, 4250, 740, 38]
+                }]
+            });
+                    </script>
+    </body>
+</html>
