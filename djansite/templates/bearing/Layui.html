@@ -13,9 +13,8 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
   
-    <link rel="stylesheet" href="{% static 'layui_files/layui.css' %}" media="all">
+    <link rel="stylesheet" href="{% static 'layui/css/layui.css' %}" media="all">
     
-    <script type="text/javascript" async="" charset="utf-8" src="{% static 'layui_files/core.php' %}"></script>
     <script src="{% static 'highcharts/code/highcharts.js' %}"></script>
     <script src="{% static 'highcharts/code/modules/exporting.js' %}"></script>
   </head>
@@ -29,19 +28,22 @@
       <li class="layui-nav-item"><a href="">首页</a></li>
       <li class="layui-nav-item"><a href="">数据平台</a></li>
       <li class="layui-nav-item"><a href="">待定选项</a></li>
+     
       <li class="layui-nav-item">
-        <a href="javascript:;">其它系统<span class="layui-nav-more"></span></a>
-        <dl class="layui-nav-child layui-anim layui-anim-upbit">
-          <dd><a href="">邮件管理</a></dd>
-          <dd><a href="">消息管理</a></dd>
-          <dd><a href="">授权管理</a></dd>
-        </dl>
+          <a href="javascript:;">解决方案</a>
+          <dl class="layui-nav-child"> <!-- 二级菜单 -->
+          <dd><a href="">移动模块</a></dd>
+          <dd><a href="">后台模版</a></dd>
+          <dd><a href="">电商平台</a></dd>
+          </dl>
       </li>
-    <span class="layui-nav-bar" style="left: 266px; top: 55px; width: 0px; opacity: 0;"></span></ul>
+  
+
+    </ul>
     <ul class="layui-nav layui-layout-right">
       <li class="layui-nav-item">
         <a href="javascript:;">
-          <img src="./Layui_files/RCzsdCq" class="layui-nav-img">
+          <img src="" class="layui-nav-img">
           Test
         <span class="layui-nav-more"></span></a>
         <dl class="layui-nav-child">
@@ -50,7 +52,7 @@
         </dl>
       </li>
       <li class="layui-nav-item"><a href="">注销</a></li>
-    <span class="layui-nav-bar"></span></ul>
+    </ul>
   </div>
   
   <div class="layui-side layui-bg-black">
@@ -102,24 +104,20 @@
     © 由 layui.com 强力驱动
   </div>
 </div>
-<script src="{% static 'layui_files/layui.js' %}" charset="utf-8"></script>
+<script src="{% static 'layui/layui.js' %}" charset="utf-8"></script>
 <script>
 //JavaScript代码区域
-layui.use('element', function(){
-  var element = layui.element;
-  
-});
+//layui.use('element', function(){
+ // var element = layui.element;
+//});
 </script>
 
-<script type="text/javascript">
-var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
-document.write(unescape("%3Cspan id='cnzz_stat_icon_30088308'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "w.cnzz.com/c.php%3Fid%3D30088308' type='text/javascript'%3E%3C/script%3E"));
-</script>
-<span id="cnzz_stat_icon_30088308"></span>
 
-<script src=" {% static 'layui_files/c.php' %}" type="text/javascript"></script>
 
 <script>
+layui.use('element', function(){
+  var element = layui.element;
+});
 Highcharts.chart('container', {
   chart: {
       type: 'spline',
@@ -186,7 +184,7 @@ Highcharts.chart('container', {
       }())
   }]
 });
-  </script>
+</script>
 
   </body>
 </html>
