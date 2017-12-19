@@ -21,4 +21,5 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.index),
     url(r'^index$', views.index ,name ='home'),
+    url(r'^dataView',views.dataView),
 ]
