@@ -22,4 +22,5 @@ urlpatterns = [
     url(r'^$', views.index),
     url(r'^index$', views.index ,name ='home'),
     url(r'^dataView',views.dataView),
+    url(r'^data/',views.getData),
 ]

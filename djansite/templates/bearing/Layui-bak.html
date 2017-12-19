@@ -118,7 +118,6 @@
 layui.use('element', function(){
   var element = layui.element;
 });
-
 Highcharts.chart('container', {
   chart: {
       type: 'spline',
@@ -133,7 +132,7 @@ Highcharts.chart('container', {
                   var x = (new Date()).getTime(), // current time
                       y = Math.random();
                   series.addPoint([x, y], true, true);
-              }, 2000);
+              }, 1000);
           }
       }
   },
