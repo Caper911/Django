@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="{% static 'layui/css/layui.css' %}" media="all">
     
     <script src="{% static 'highcharts/code/highcharts.js' %}"></script>
+    <script src="{% static 'jquery-3.2.1.min.js' %}"></script>
     <script src="{% static 'highcharts/code/modules/exporting.js' %}"></script>
   </head>
 
@@ -88,8 +89,7 @@
       
       <br><br>
       <blockquote class="layui-elem-quote">
-        layui 之所以赢得如此多人的青睐，更多是在于它“前后台系统通吃”的能力。既可编织出绚丽的前台页面，又可满足繁杂的后台功能需求。
-        <br>layui 后台布局， 致力于让每一位开发者都能轻松搭建自己的后台模板。
+        layui 后台布局， 致力于让每一位开发者都能轻松搭建自己的后台模板。
       </blockquote>
       
   
@@ -119,21 +119,39 @@ layui.use('element', function(){
   var element = layui.element;
 });
 
+
 Highcharts.chart('container', {
+
+  //动态生成
   chart: {
       type: 'spline',
       animation: Highcharts.svg, // don't animate in old IE
       marginRight: 10,
+
       events: {
+          //加载新的点
           load: function () {
 
               // set up the updating of the chart each second
+              // 类里面的series
               var series = this.series[0];
+              var i = 1;
+              var rett;
+
+              //2000ms刷新一次 
               setInterval(function () {
+                $.getJSON('/ajax_dict/',function(ret){
+                            // 把 ret 的每一项显示在网页上
+                            rett = ret[i];
+                        })
                   var x = (new Date()).getTime(), // current time
-                      y = Math.random();
+                      y = rett;
+    
                   series.addPoint([x, y], true, true);
-              }, 2000);
+                  i++;
+
+              }, 1000);
+
           }
       }
   },
@@ -158,7 +176,7 @@ Highcharts.chart('container', {
       formatter: function () {
           return '<b>' + this.series.name + '</b><br/>' +
               Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
-              Highcharts.numberFormat(this.y, 2);
+              Highcharts.numberFormat(this.y, 3);
       }
   },
   legend: {
@@ -167,6 +185,11 @@ Highcharts.chart('container', {
   exporting: {
       enabled: false
   },
+  credits: { 
+      enabled: false   //右下角不显示LOGO 
+  }, 
+
+  //事先显示好的
   series: [{
       name: '震动值',
       data: (function () {
@@ -178,7 +201,7 @@ Highcharts.chart('container', {
           for (i = -19; i <= 0; i += 1) {
               data.push({
                   x: time + i * 1000,
-                  y: Math.random()
+                  y: 0
               });
           }
           return data;

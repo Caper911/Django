@@ -22,5 +22,5 @@ urlpatterns = [
     url(r'^$', views.index),
     url(r'^index$', views.index ,name ='home'),
     url(r'^dataView',views.dataView),
-    url(r'^data/',views.getData),
+    url(r'^ajax_dict/$',views.ajax_dict,name='ajax_dict'),
 ]
