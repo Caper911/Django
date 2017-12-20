@@ -6,7 +6,7 @@ import json
 # Create your views here.
 
 def index(request):
-    return render(request,'bearing/Layui.html')
+    return render(request,'bearing/Layuilineboost.html')
 
 def dataView(request):
     ch = locationOne.objects.get(pk=1)
