@@ -8,6 +8,9 @@ import json
 def index(request):
     return render(request,'bearing/Layuilineboost.html')
 
+def adminindex(request):
+    return render(request,'bearing/admin-index.html')
+
 def dataView(request):
     ch = locationOne.objects.get(pk=1)
     return render(request,'bearing/dataView.html',{'ch':ch})
@@ -17,7 +20,7 @@ def ajax_dict(request):
     arr = []
     allch = locationOne.objects.all()
     for ch in allch:
-        arr.append(ch.ch1)
+        arr.append(ch.ch2)
     
     return JsonResponse(arr,safe=False)
         

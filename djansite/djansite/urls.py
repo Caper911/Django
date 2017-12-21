@@ -20,6 +20,7 @@ from bearing import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.index),
+    url(r'^adminindex/',views.adminindex),
     url(r'^index$', views.index ,name ='home'),
     url(r'^dataView',views.dataView),
     url(r'^ajax_dict/$',views.ajax_dict,name='ajax_dict'),
