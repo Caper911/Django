@@ -24,4 +24,6 @@ urlpatterns = [
     url(r'^index$', views.index ,name ='home'),
     url(r'^dataView',views.dataView),
     url(r'^ajax_dict/$',views.ajax_dict,name='ajax_dict'),
+    url(r'^login',views.adminlogin),
+    url(r'^api/getmem',views.saveInfo),
 ]

@@ -1,0 +1,81 @@
+采集服务器的信息的python程序
+#coding:utf-8
+import psutil
+import urllib
+import urllib.request
+import urllib.parse
+#import urllib2
+import requests
+
+#获取数据
+cpuData = psutil.cpu_times()
+#处理数据
+cpuMax = cpuData.user+cpuData.system+cpuData.idle
+cpuUsed = cpuData.user+cpuData.system
+cpuUse = cpuUsed/cpuMax
+
+#将数据进行打包
+data = {"cpuUsed":cpuUse}
+#sendData = urllib.parse.urlencode(data)
+#sendData = sendData.encode('utf-8')
+url = "http://192.168.52.129:8000/api/savecpu/"
+#定义请求头部
+header = {
+        "User-Agent":"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36",
+    }
+
+#定义请求
+res =requests.post(url,data = data)
+#req = urllib.request.Request(url,data = sendData,headers = header,method = 'POST')
+#添加Header
+#req.add_header(headers = header)
+#发送请求
+#ope = urllib.request.urlopen(req)
+#打印结果
+print(res.content.decode())
+#print(ope.read())
+
+
+django创建项目，创建app,我这里创建了一个api的应用
+api的urls.py文件配置信息
+
+from django.conf.urls import url
+from . import views
+
+urlpatterns = [
+     url(r'^index/$', views.index,name='index'),
+     # url(r'^getinfo/$',views.getinfo,name='getinfo'),
+     url(r"^savecpu/$", views.saveCpu,name='saveCpu'),
+     url(r"^showcpu/$", views.show,name='showcpu'),
+
+]
+
+
+视图文件
+定义了2个函数
+
+def saveCpu(request):
+    """
+        这个方法就是我们的接口方法，
+        当被请求时会将请求上来的数据存入数据库
+    """
+    statue = {}
+    if request.method == "POST" and request.POST: #检测请求的方式是post，并且post请求有数据
+        #request.POST 这个方法以字典的形式存放着当前post请求的所有数据
+        cpuUsed = request.POST["cpuUsed"] #使用类字典的取值方式取出传递上来的cpu使用率
+        times = datetime.datetime.now() #获取当前时间
+        cpuDatabase = SaveCpu() #实例化一个SaveCpu的模型实例
+        cpuDatabase.used = cpuUsed #将数据赋值给模型
+        cpuDatabase.time = times #同上
+        cpuDatabase.save() #将模型映射到数据库
+        statue["statue"] = "success" #定义当前接口状态为保存成功
+    else:
+        statue["statue"] = "request method must be post" #定义当前接口状态为失败
+    return JsonResponse(statue) #将接口状态返回给请求者
+
+def show(request):
+    cpu = SaveCpu.objects.all()
+    return render(request,"api/showData.html",locals())
+# Create your views here.
+
+agent 端（python程序）不断的采集到本机服务器的信息，通过api把数据传递给WEB服务器端（django），web server端接收到接口传过来的数据，把传递过来的数据按照格式存入数据库保存数据，从数据库中提取数据，前端页面展示数据
