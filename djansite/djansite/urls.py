@@ -22,8 +22,10 @@ urlpatterns = [
     url(r'^$', views.index),
     url(r'^adminindex/',views.adminindex),
     url(r'^index$', views.index ,name ='home'),
-    url(r'^dataView',views.dataView),
+    url(r'^dataView',views.infoView),
     url(r'^ajax_dict/$',views.ajax_dict,name='ajax_dict'),
+    url(r'^ajax_dict_realtime/$',views.ajax_dict_realtime,),
     url(r'^login',views.adminlogin),
     url(r'^api/getmem',views.saveInfo),
+    url(r'^ajax_19info/$',views.getlast19_info,name='ajax_19info'),
 ]

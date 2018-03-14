@@ -82,17 +82,27 @@
   <div class="layui-body">
     <!-- 内容主体区域 -->
     <div style="padding: 15px;">
-      震动传感器 No.1
-      
-      <br><br>
+      <hr class="layui-bg-green">      
       <blockquote class="layui-elem-quote">
         layui 后台布局， 致力于让每一位开发者都能轻松搭建自己的后台模板。
       </blockquote>
+      <div class="layui-container">
+       
+      <fieldset class="layui-elem-field layui-field-title" style="margin-top: 20px;">
+        <legend>数据采集节点信息</legend>
+      </fieldset>
+       
+      <div class="layui-row">
+        <div class="layui-col-xs6">
+          <div class="grid-demo grid-demo-bg1"><div id="container" style="height: 350px; max-width: 500px; margin: 0 auto"></div></div>
+        </div>
+        <div class="layui-col-xs6">
+          <div class="grid-demo"><div id="container" style="height: 350px; max-width: 500px; margin: 0 auto"></div></div>
+        </div>
+      </div>
       
-  
-      <div id="container" style="height: 600px; max-width: 1000px; margin: 0 auto"></div>
-      
-      
+      </div>
+    
       
     </div>
   </div>
@@ -103,14 +113,6 @@
   </div>
 </div>
 <script src="{% static 'layui/layui.js' %}" charset="utf-8"></script>
-<script>
-//JavaScript代码区域
-//layui.use('element', function(){
- // var element = layui.element;
-//});
-</script>
-
-
 
 <script>
 layui.use('element', function(){
@@ -118,65 +120,149 @@ layui.use('element', function(){
 });
 
 
-function getData(n) {
-  var arr = [];
-    a=n;
-      $.ajaxSettings.async = false; 
-      $.getJSON('/ajax_dict/',function(ret){
-      
-      $.each(ret,function(i,valuee){
-        arr.push([i,valuee]);
-      }); 
+<!--get data from mysql api:ajax_dict-->
 
-    }) ;
-    $.ajaxSettings.async = true;
-    return arr;
+<!--修改数据图的类型，动态加载还是其他类型-->
+
+</script>
+<script>
+
+$.ajaxSettings.async = false;
+function getInfobyId(i=0) {
+    var list = new Array();
+    $.getJSON('/ajax_19info/',
+                function(data) {
+                    list = [].concat(data);
+                } 
+            )
+
+    return list[i];
 }
 
+Highcharts.setOptions({ global: { useUTC: false } });   
+                     
 
-var n = 20480,
-      data = getData(n);
-
-console.time('line');
-
+Highcharts.setOptions({
+    lang:{
+       contextButtonTitle:"图表导出菜单",
+       decimalPoint:".",
+       downloadJPEG:"下载JPEG图片",
+       downloadPDF:"下载PDF文件",
+       downloadPNG:"下载PNG文件",
+       downloadSVG:"下载SVG文件",
+       drillUpText:"返回 {series.name}",
+       loading:"加载中",
+       months:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],
+       noData:"没有数据",
+       numericSymbols: [ "千" , "兆" , "G" , "T" , "P" , "E"],
+       printChart:"打印图表",
+       resetZoom:"恢复缩放",
+       resetZoomTitle:"恢复图表",
+       shortMonths: [ "Jan" , "Feb" , "Mar" , "Apr" , "May" , "Jun" , "Jul" , "Aug" , "Sep" , "Oct" , "Nov" , "Dec"],
+       thousandsSep:",",
+       weekdays: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六","星期天"]
+    }
+});
 
 Highcharts.chart('container', {
-  
+  //动态生成
   chart: {
-      zoomType: 'x'
+      type: 'spline',
+      animation: Highcharts.svg, // don't animate in old IE
+      marginRight: 10,
+
+      events: {
+          //加载新的点
+            load: function() {
+
+            // set up the updating of the chart each second
+            // 类里面的series
+            var series = this.series[0];
+
+            //1000ms刷新一次 
+            setInterval(function() {
+                $.getJSON('/ajax_dict_realtime/',
+                function(ret) {
+                        
+                // 把 ret 的每一项显示在网页上
+                //var x = Date.parse(new Date(ret['time'])), // current time 
+                                    
+                var x = (new Date()).getTime(),
+                // current time
+                y = parseFloat(ret['value']);
+
+            series.addPoint([x, y], true, true);})
+        },1000);
+    } }
+  },
+  // the title of table
+  title: {
+      text: '内存信息'
+  },
+  xAxis: {
+      title: {
+          text: '时间'
+      },
+      type: 'datetime',
+      tickPixelInterval: 150
   },
   yAxis: {
-    title: {
-      text: '数值'
-    },
+      title: {
+          text: '数值(MB)'
+      },
+      plotLines: [{
+          value: 0,
+          width: 1,
+          color: '#808080'
+      }],
+      max: 8000
   },
-  boost: {
-      useGPUTranslations: true
-  },
-
-  title: {
-      text: '震动传感器ch1: ' + n + ' 条数据'
-  },
-  // 禁用版权信息
-  credits:{
-     enabled: false 
-  },
-  subtitle: {
-      text: 'Using the Boost module'
-  },
-
   tooltip: {
-      valueDecimals: 2
+      formatter: function () {
+          return '<b>' + this.series.name + '</b><br/>' +
+              Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+              Highcharts.numberFormat(this.y, 3);
+      }
   },
-
+  legend: {
+      enabled: false
+  },
+  exporting: {
+      enabled: true
+  },
+  credits: { 
+      enabled: false   //右下角不显示LOGO 
+  }, 
+  plotOptions: {
+      spline: {
+          marker: {
+              enabled: true
+          }
+      }
+  },
   series: [{
-      data: data,
-      lineWidth: 0.5
-  }]
+      name: '已用内存(MB)',
+      data: (function () {
+          // generate an array of random data
+          var data = [],
+              time = (new Date()).getTime(),
+              i;
 
+          for (i = -19; i <= 0; i += 1) {
+              data.push({
+                  x: time + i * 1000,
+                  y: getInfobyId(i+19)
+              });
+          }
+          return data;
+      }())
+         
+  }] 
+                
 });
-console.timeEnd('line');
-</script>
 
+
+               
+</script>
   </body>
 </html>

@@ -12,6 +12,15 @@ class locationOne(models.Model):
     ch7 = models.FloatField()
     ch8 = models.FloatField()
     
+    
+class testInfo(models.Model):
+    #info = models.FloatField()
+    info = models.CharField(max_length=30)
+    num = models.FloatField()
+    time = models.DateTimeField()
+    
+
+    
 class User(models.Model):
     username = models.CharField(max_length=50)
     password = models.CharField(max_length=50)

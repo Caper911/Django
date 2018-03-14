@@ -16,7 +16,7 @@ def getMem():
     mem_use = mem_use // 1024
     print('use mem:' + str(mem_use) + 'MB')
     
-    data = {"memUsed":mem_use}
+    data = {"info":'mem',"memUsed":mem_use}
     
 #定义请求头部
     header = {
@@ -30,7 +30,7 @@ def getMem():
         print('status code : 200,sucess!')
     else:
         print('status code : '+ str(status_code) + ',sucess!')
-
+    
 while True:
-    #time.sleep(1)
+    time.sleep(1)
     getMem()
