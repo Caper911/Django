@@ -66,9 +66,9 @@
         <li class="layui-nav-item layui-nav-itemed">
           <a class="" href="javascript:;">所有节点<span class="layui-nav-more"></span></a>
           <dl class="layui-nav-child">
-            <dd><a href="javascript:;">节点No.1</a></dd>
-            <dd><a href="javascript:;">节点No.2</a></dd>
-            <dd><a href="javascript:;">节点No.3</a></dd>
+            <dd><a href="sensorDataView?location=shenzhen">深圳制造厂</a></dd>
+            <dd><a href="sensorDataView?location=dongguan">东莞制造厂</a></dd>
+            <dd><a href="sensorDataView?location=huizhou">惠州制造厂</a></dd>
           </dl>
         </li>
         <li class="layui-nav-item">
@@ -96,16 +96,19 @@
     <div style="margin-left: 30px">
         <div class="layui-container">
           <div class="layui-row">
-            <div class="layui-col-md6">
+            <div class="layui-col-md8">
               <form class="layui-form">
                 <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
                 <div class="layui-form-item">
                   <div class="layui-input-inline">
-                    <select name="lathe" lay-verify="required" lay-filter="lathe">
+                    <select name="lathe" id="all-select-Machine" lay-verify="required" lay-filter="MachineID">
                       <option value="">车床编号</option>
-                      <option value="forceX">No.1</option>
-                      <option value="forceY">No.2</option>
-                      <option value="forceZ">No.3</option>
+                    </select>
+                  </div>
+                  
+                  <div class="layui-input-inline" id="select-times">
+                    <select name="lathe" id="all-select-times" lay-verify="required" lay-filter="opCode">
+                      <option value="">操作代号</option>
                     </select>
                   </div>
                 
@@ -130,7 +133,7 @@
         </div>
        </div>
         
-       <div id="container" style="height: 500px; max-width: 1000px; margin: 0 auto"></div>
+       <div id="container" style="height: 400px; max-width: 1000px; margin: 0 auto"></div>
        
        
   </div>
@@ -146,6 +149,47 @@
 layui.use('element', function(){
   var element = layui.element;
 });
+
+
+//获取url中"?"符后的字串
+function getQueryString() {  
+  var qs = location.search.substr(1), // 获取url中"?"符后的字串  
+    args = {}, // 保存参数数据的对象
+    items = qs.length ? qs.split("&") : [], // 取得每一个参数项,
+    item = null,
+    len = items.length;
+ 
+  for(var i = 0; i < len; i++) {
+    item = items[i].split("=");
+    var name = decodeURIComponent(item[0]),
+      value = decodeURIComponent(item[1]);
+    if(name) {
+      args[name] = value;
+    }
+  }
+  return args;
+}
+
+function loadMachineIDselect(form){
+        var urll = getQueryString()
+        var loca = urll["location"];
+                           
+        $.ajax({
+            type: 'POST',
+            url: '/getMachineIDbylocation',
+            data: {
+                location: loca
+            },
+            success:function(data) {
+                
+                for(var i = 0; i < data.length;i++){
+                    //console.log(data[i].machineID)  
+                    $("#all-select-Machine").append("<option value=" + data[i].machineID + "> 切割机床 No." + data[i].machineID + "</option>")           
+                }
+                form.render();   
+            }
+        })
+}
 </script>
 
 <script>
@@ -170,18 +214,59 @@ Highcharts.setOptions({
        weekdays: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六","星期天"]
     }
 });
+    
+    
+//设置Highcharts的时区
 Highcharts.setOptions({ global: { useUTC: false } }); 
 
-//getSensorInfo?opCodeID=1&sensorName=forceY
-///getCpuInfo_filter/
+
 
 layui.use('form', function(){
   var form = layui.form;
-  
-  //监听提交
+  loadMachineIDselect(form);
+  var opCode;
+
+
+
+  form.on('select(opCode)',function(data){
+      opCode = data.value;
+      form.render();            
+  })          
+       
+  form.on('select(MachineID)',function(MachineID){
+    var urll = getQueryString()
+    var loca = urll["location"];
+                           
+    $.ajax({
+        type: 'POST',
+        url: '/getOpcodeByMachineID',
+        data: {
+            location: loca,
+            machineID: MachineID.value
+        },
+        success:function(data) {
+            $("#all-select-times").empty();
+            $("#all-select-times").append("<option>请选择切割编号</option>");
+             var time = 1;
+            for(var i = 0; i < data.length;i++){
+                
+                console.log(data[i]);  
+                $("#all-select-times").append("<option value=" + data[i] + "> 第 " + time + " 次切割 </option>")           
+                time++;
+            }
+            form.render();   
+        }
+    })
+   })                   
+        
+  //监听传感器选择下拉框，改变则重新获取数据
   form.on('select(sensor)', function(sensorName){
-    var url = "/getSensorInfo?opCodeID=1&sensorName=";
+   
+    console.log(opCode);
     
+    var url = "/getSensorInfo?opCodeID="
+    url += opCode;
+    url += "&sensorName="
     url += sensorName.value;
 
     $.getJSON(url, function (data) {
@@ -249,63 +334,59 @@ layui.use('form', function(){
 </script>
 
 <script>
-$.getJSON('/getSensorInfo?opCodeID=1&sensorName=forceX', function (data) {
-     $('#container').highcharts('StockChart', {
-            title: {
-                text: '压力传感器(X轴)'
+$('#container').highcharts('StockChart', {
+    title: {
+        text: '请选择传感器'
+    },
+    subtitle: {
+        text: 'Please Selection Sensor'
+    },
+    xAxis: {
+        gapGridLineWidth: 0
+    },
+    rangeSelector: {
+        buttons: [{
+            type: 'hour',
+            count: 1,
+            text: '1h'
+        },
+        {
+            type: 'day',
+            count: 1,
+            text: '1D'
+        },
+        {
+            type: 'all',
+            count: 1,
+            text: 'All'
+        }],
+        selected: 1,
+        inputEnabled: false
+    },
+    tooltip: {
+        split: false
+    },
+    series: [{
+        name: '压力传感器(X轴)',
+        type: 'area',
+        data: [],
+        gapSize: 5,
+        tooltip: {
+            valueDecimals: 3,
+            //valueSuffix: ' %'
+        },
+        fillColor: {
+            linearGradient: {
+                x1: 0,
+                y1: 0,
+                x2: 0,
+                y2: 1
             },
-            subtitle: {
-                text: 'Using ordinal X axis'
-            },
-            xAxis: {
-                gapGridLineWidth: 0
-            },
-            rangeSelector : {
-                buttons : [{
-                    type : 'hour',
-                    count : 1,
-                    text : '1h'
-                }, {
-                    type : 'day',
-                    count : 1,
-                    text : '1D'
-                }, {
-                    type : 'all',
-                    count : 1,
-                    text : 'All'
-                }],
-                selected : 1,
-                inputEnabled : false
-            },
-            tooltip: {
-                split: false
-            },
-            series : [{
-                name : '压力传感器(X轴)',
-                type: 'area',
-                data : data,
-                gapSize: 5,
-                tooltip: {
-                    valueDecimals: 3,
-                    //valueSuffix: ' %'
-                    
-                },
-                fillColor : {
-                    linearGradient : {
-                        x1: 0,
-                        y1: 0,
-                        x2: 0,
-                        y2: 1
-                    },
-                    stops : [
-                        [0, Highcharts.getOptions().colors[0]],
-                        [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]
-                    ]
-                },
-                threshold: null
-            }]
-        });
-    });
+            stops: [[0, Highcharts.getOptions().colors[0]], [1, Highcharts.Color(Highcharts.getOptions().colors[0]).setOpacity(0).get('rgba')]]
+        },
+        threshold: null
+    }]
+});
 </script>
 
 

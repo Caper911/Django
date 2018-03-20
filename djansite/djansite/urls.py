@@ -30,4 +30,6 @@ urlpatterns = [
     url(r'^ajax_19info/$',views.getlast19_info,name='ajax_19info'),
     url(r'^getCpuInfo_filter/$',views.getCpuInfo_filter),
     url(r'^getSensorInfo$',views.getSensorInfo),
+    url(r'^getMachineIDbylocation$',views.getMachineIDbylocation),
+    url(r'^getOpcodeByMachineID$',views.getOpcodeByMachineID),
 ]

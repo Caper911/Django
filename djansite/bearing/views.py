@@ -151,6 +151,52 @@ def saveInfo(request):
      #将接口状态返回给请求者
     return JsonResponse(statue)
         
+################################################################################        
+# 样式动态设置
+
+#下拉框
+def getMachineIDbylocation(request):
+    statue = ""
+    #检测请求的方式是post，并且post请求有数据
+    if request.method == "POST" and request.POST:
+        location = request.POST['location']
+        arr = []
+        if not location is None:    
+            AllMachineID =  sensorInfo.objects.filter(location=location ).values("machineID").distinct()
+            for MachineID in AllMachineID:
+                arr.append(MachineID)
+        else:
+            arr = []
+        return JsonResponse(arr,safe=False)
+    else:
+        statue = '404'
+        return JsonResponse(statue,safe=False)
+    
+def getOpcodeByMachineID(request):
+    statue = ""
+    arr = []
+    #检测请求的方式是post，并且post请求有数据
+    if request.method == "POST" and request.POST:
+
+        machineID = request.POST['machineID']
+        location = request.POST['location']
+        
+        machineData = sensorInfo.objects.all().filter(location=location)
+        machineID = machineData.filter(machineID=machineID)
+        for machine in machineID:
+    
+            info = opStartEnddate.objects.prefetch_related().filter(sensorID=machine)
+            for inff in info:
+                arr.append(inff.opCodeID)
+        return JsonResponse(arr,safe=False)
+    else:
+        statue = '404'
+        return JsonResponse(statue,safe=False)
+
+
         
         
+    
+    
+    
     

@@ -15,34 +15,38 @@ if django.VERSION >= (1,7):
 '''
 
 def initInfo():
-    sensorID = 'shenzhenM1S1'
-    location = 'shenzhen'
+    sensorID = 'dongguanM14'
+    location = 'dongguan'
     description = r'Three axis vibration / force sensor and acoustic emission sensor'
     addDate = datetime.datetime.now()
-    MachineID = 1
+    MachineID = 4
     
     startDate = datetime.datetime.now()
     endDate = datetime.datetime.now()+datetime.timedelta(minutes=10)
     
-    info = sensorInfo.objects.create(sensorID=sensorID,location=location,description=description,
+    infoo = sensorInfo.objects.create(sensorID=sensorID,location=location,description=description,
                             addDate=addDate,machineID=MachineID)
-    info.save()
-    info = opStartEnddate.objects.create(startDate=startDate,endDate=endDate,sensorID=info)
+    infoo.save()
+    
+    info = opStartEnddate.objects.create(startDate=startDate,endDate=endDate,sensorID=infoo)
+    time.sleep(2)
+    
+    startDate = datetime.datetime.now()
+    endDate = datetime.datetime.now()+datetime.timedelta(minutes=10)
+    info = opStartEnddate.objects.create(startDate=startDate,endDate=endDate,sensorID=infoo)
     info.save()
     
 
 
-
-
 def main():
-    f = open('DATA/c_4_001.txt')
+    f = open('DATA/c_4_003.txt')
     for line in f:
 
         endDate = datetime.datetime.now()
         endDate = endDate + datetime.timedelta(seconds=1)
         print(endDate)
         time.sleep(1)
-        opCode =opStartEnddate.objects.get(opCodeID=1)
+        opCode =opStartEnddate.objects.get(opCodeID=4)
         forceX, forceY, forceZ, shakeX, shakeY, shakeZ, acouEmission = line.split('	')
         
         info = sensorData.objects.create(forceX=forceX,forceY=forceY,forceZ=forceZ,
@@ -74,12 +78,23 @@ def getSensorInfo(test):
     for infffff in infooo:
         print(infffff['id'])    
     
+def getOpcodeByMachineID(location,machineID):
+    machineID = machineID
+    location = location
     
+    machineData = sensorInfo.objects.all().filter(location=location)
+    machineID = machineData.filter(machineID=machineID)
+    for machine in machineID:
+
+        info = opStartEnddate.objects.prefetch_related().filter(sensorID=machine)
+        for inff in info:
+            print(inff.opCodeID)
+   
 
 if __name__ == "__main__":
     #initInfo()
     #main()
-    getSensorInfo(1)
+    getOpcodeByMachineID('dongguan','4')
     print('Done!')
 
 
