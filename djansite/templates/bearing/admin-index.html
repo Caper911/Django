@@ -27,15 +27,19 @@
     <div class="layui-logo">后台管理</div>
     <!-- 头部区域（可配合layui已有的水平导航） -->
     <ul class="layui-nav layui-layout-left">
-      <li class="layui-nav-item"><a href="">首页</a></li>
-      <li class="layui-nav-item"><a href="">用户配置</a></li>
-      <li class="layui-nav-item"><a href="">系统配置</a></li>
-      <li class="layui-nav-item"><a href="">个人信息管理</a>
-        <dl class="layui-nav-child"> <!-- 二级菜单 -->
-          <dd><a href="">基本资料</a></dd>
-          <dd><a href="">安全设置</a></dd>
+      <li class="layui-nav-item"><a href="/index">首页</a></li>
+      <li class="layui-nav-item"><a href="/adminindex">数据平台</a></li>
+      <li class="layui-nav-item"><a href="">待定选项</a></li>
+     
+      <li class="layui-nav-item">
+          <a href="javascript:;">解决方案</a>
+          <dl class="layui-nav-child"> <!-- 二级菜单 -->
+          <dd><a href="">移动模块</a></dd>
+          <dd><a href="">后台模版</a></dd>
+          <dd><a href="">电商平台</a></dd>
           </dl>
       </li>
+  
 
     </ul>
     <ul class="layui-nav layui-layout-right">
@@ -74,7 +78,14 @@
             
           </dl>
         </li>
-        <li class="layui-nav-item"><a href="">待添加</a></li>
+        <li class="layui-nav-item">
+          <a class="" href="javascript:;">所有节点<span class="layui-nav-more"></span></a>
+          <dl class="layui-nav-child">
+            <dd><a href="/sensorDataView?location=shenzhen">深圳制造厂</a></dd>
+            <dd><a href="/sensorDataView?location=dongguan">东莞制造厂</a></dd>
+            <dd><a href="/sensorDataView?location=huizhou">惠州制造厂</a></dd>
+          </dl>
+        </li>
       <span class="layui-nav-bar"></span></ul>
     </div>
   </div>

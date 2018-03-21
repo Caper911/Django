@@ -4,7 +4,8 @@ import urllib
 import urllib.request
 import requests
 
-url = "http://127.0.0.1:8000/api/getmem/"
+#url = "http://127.0.0.1:8000/api/getmem/"
+url = "http://23.105.197.30:8080/api/getmem/"
 import psutil
 
 

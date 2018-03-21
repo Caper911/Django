@@ -51,10 +51,10 @@ def get_last_info(info):
 def getlast19_info(request):
     
     infolist = []
-    allinfo = testInfo.objects.order_by('-id')
+    allinfo = cpuInfo.objects.order_by('-id')
     arr = allinfo[1:21]
     for arrinfo in arr:
-        infolist.append(arrinfo.num)
+        infolist.append(arrinfo.value)
         
     infolist.reverse()
     return JsonResponse(infolist,safe=False)

@@ -26,9 +26,9 @@
   <div class="layui-header">
     <div class="layui-logo">数据展示</div>
     <!-- 头部区域（可配合layui已有的水平导航） -->
-    <ul class="layui-nav layui-layout-left">
+    <ul class="layui-nav layui-layout-left" lay-filter="mainlay">
       <li class="layui-nav-item"><a href="/index">首页</a></li>
-      <li class="layui-nav-item"><a href="/sensorData">数据平台</a></li>
+      <li class="layui-nav-item"><a href="/adminindex">数据平台</a></li>
       <li class="layui-nav-item"><a href="">待定选项</a></li>
      
       <li class="layui-nav-item">
@@ -62,11 +62,11 @@
       <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
       <ul class="layui-nav layui-nav-tree" lay-filter="test">
         <li class="layui-nav-item layui-nav-itemed">
-          <a class="" href="javascript:;">所有节点<span class="layui-nav-more"></span></a>
+          <a class="" href="javascript:;">系统信息<span class="layui-nav-more"></span></a>
           <dl class="layui-nav-child">
-            <dd><a href="javascript:;">节点No.1</a></dd>
-            <dd><a href="javascript:;">节点No.2</a></dd>
-            <dd><a href="javascript:;">节点No.3</a></dd>
+            <dd><a href="javascript:;">待定</a></dd>
+            <dd><a href="javascript:;">待定</a></dd>
+            <dd><a href="javascript:;">待定</a></dd>
           </dl>
         </li>
         <li class="layui-nav-item">
@@ -98,9 +98,9 @@
         <li class="layui-timeline-item">
           <i class="layui-icon layui-timeline-axis"></i>
           <div class="layui-timeline-content layui-text">
-            <h3 class="layui-timeline-title">V-0.1</h3>
+            <h3 class="layui-timeline-title">V0.2</h3>
             <p>
-              layui 2.0 的一切准备工作似乎都已到位。发布之弦，一触即发。
+              完成第一版界面设计，确定设计方案及各模块的设计方法。
               <br>不枉近百个日日夜夜与之为伴。因小而大，因弱而强。
               <br>无论它能走多远，抑或如何支撑？至少我曾倾注全心，无怨无悔 <i class="layui-icon"></i>
             </p>
@@ -109,12 +109,12 @@
         <li class="layui-timeline-item">
           <i class="layui-icon layui-timeline-axis"></i>
           <div class="layui-timeline-content layui-text">
-            <h3 class="layui-timeline-title">8月16日</h3>
-            <p>杜甫的思想核心是儒家的仁政思想，他有<em>“致君尧舜上，再使风俗淳”</em>的宏伟抱负。个人最爱的名篇有：</p>
-            <ul>
-              <li>《登高》</li>
-              <li>《茅屋为秋风所破歌》</li>
-            </ul>
+            <h3 class="layui-timeline-title">V0.1</h3>
+            <p>
+              毕业设计课题确定，开始准备设计方案。
+              <br>不枉近百个日日夜夜与之为伴。因小而大，因弱而强。
+              <br>无论它能走多远，抑或如何支撑？至少我曾倾注全心，无怨无悔 <i class="layui-icon"></i>
+            </p>
           </div>
         </li>
         <li class="layui-timeline-item">
@@ -148,18 +148,14 @@
   </div>
 </div>
 <script src="{% static 'layui/layui.js' %}" charset="utf-8"></script>
-<script>
-//JavaScript代码区域
-//layui.use('element', function(){
- // var element = layui.element;
-//});
-</script>
-
-
 
 <script>
 layui.use('element', function(){
   var element = layui.element;
+                             
+  element.on('nav(mainlay)',function(elem){
+     console.log(elem);     
+  });
 });
 </script>
 
