@@ -1,4 +1,8 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 
 # Create your models here.
 
@@ -26,12 +30,12 @@ class sensorData(models.Model):
     time = models.DateTimeField()
     opCodeID = models.ForeignKey(opStartEnddate)
     
-class testInfo(models.Model):
-    #info = models.FloatField()
-    info = models.CharField(max_length=30)
-    num = models.FloatField()
-    time = models.DateTimeField()
-    
+#class testInfo(models.Model):
+#    #info = models.FloatField()
+#    info = models.CharField(max_length=30)
+#    num = models.FloatField()
+#    time = models.DateTimeField()
+#    
 class cpuInfo(models.Model):
     value = models.FloatField()
     time = models.DateTimeField()
@@ -45,9 +49,26 @@ class ioInfo(models.Model):
     value = models.FloatField()
     time = models.DateTimeField()
         
-class User(models.Model):
-    username = models.CharField(max_length=50)
-    password = models.CharField(max_length=50)
-    
-    def __unicode__(self):
-        return self.username
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    phonenumber = models.CharField(max_length=11,blank=True)
+    avatar = models.ImageField(upload_to='photo',null=True,blank=True)
+#    id = models.AutoField(primary_key=True)
+#    username = models.CharField(max_length=16,primary_key=True)
+#    password = models.CharField(max_length=32)
+#    email = models.EmailField(blank=True)
+
+#    is_active = models.BooleanField(default=False)
+#    
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        Profile.objects.create(user=instance)
+ 
+@receiver(post_save, sender=User)
+def save_user_profile(sender, instance, **kwargs):
+    instance.profile.save()
+

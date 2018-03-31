@@ -24,7 +24,7 @@ SECRET_KEY = '=)ddfc72x9@*4ss)etgpc9^r9aap=bd6-7ial07n-@_wm^)l7p'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
+#DEBUG = False
 ALLOWED_HOSTS = ['23.105.197.30','localhost','127.0.0.1',]
 
 
@@ -90,6 +90,7 @@ DATABASES = {
         'PASSWORD':'caper911',
         'HOST':'127.0.0.1',
         'PORT':'3306',
+        "TEST_CHARSET": "utf8",
     }
 } 
 
@@ -134,3 +135,6 @@ STATIC_ROOT= os.path.join(BASE_DIR,'statics/')
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, 'static'),
 )
+
+#################################################################
+LOGIN_URL = '/login/'  

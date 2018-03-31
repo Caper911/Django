@@ -16,20 +16,34 @@ Including another URLconf
 from django.conf.urls import url
 from django.contrib import admin
 from bearing import views
+from django.conf import settings
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
+    url(r'^home/',views.home),
+    url(r'^all/',views.componentGridAll),
+    url(r'^setUserInfo/',views.setUserInfo),
+    url(r'^setUserPassword/',views.setUserPassword),
+    url(r'^setSystemWebsite/',views.setSystemWebsite),
+    url(r'^setSystemEmail/',views.setSystemEmail),
     url(r'^$', views.index),
+    url(r'^login/', views.login,name='login'),
+    url(r'^logout/', views.logout_view,name='logout'),
+    url(r'^dealLogin/', views.dealLogin),
+    url(r'^reg/', views.register),
+    url(r'^dealReg/', views.dealReg),
+    url(r'^dealVerCode/',views.getPhoneSendVercode),
     url(r'^adminindex/',views.adminindex),
     url(r'^sensorData',views.sensorDataView),
     url(r'^index$', views.index ,name ='home'),
     url(r'^ajax_dict/$',views.ajax_dict,name='ajax_dict'),
     url(r'^ajax_dict_realtime/$',views.ajax_dict_realtime,),
-    url(r'^login',views.adminlogin),
     url(r'^api/getmem',views.saveInfo),
     url(r'^ajax_19info/$',views.getlast19_info,name='ajax_19info'),
     url(r'^getCpuInfo_filter/$',views.getCpuInfo_filter),
     url(r'^getSensorInfo$',views.getSensorInfo),
     url(r'^getMachineIDbylocation$',views.getMachineIDbylocation),
     url(r'^getOpcodeByMachineID$',views.getOpcodeByMachineID),
+    url(r'^user/captcha/$',views.captcha),
 ]
+
