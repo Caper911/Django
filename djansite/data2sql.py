@@ -15,11 +15,11 @@ if django.VERSION >= (1,7):
 '''
 
 def initInfo():
-    sensorID = 'dongguanM14'
-    location = 'dongguan'
+    sensorID = 'huizhouM12'
+    location = 'huizhou'
     description = r'Three axis vibration / force sensor and acoustic emission sensor'
     addDate = datetime.datetime.now()
-    MachineID = 4
+    MachineID = 2
     
     startDate = datetime.datetime.now()
     endDate = datetime.datetime.now()+datetime.timedelta(minutes=10)
@@ -39,7 +39,7 @@ def initInfo():
 
 
 def main():
-    f = open('DATA/c_4_003.txt')
+    f = open('DATA/c_4_004.txt')
     for line in f:
 
         endDate = datetime.datetime.now()
@@ -93,8 +93,8 @@ def getOpcodeByMachineID(location,machineID):
 
 if __name__ == "__main__":
     #initInfo()
-    #main()
-    getOpcodeByMachineID('dongguan','4')
+    main()
+    #getOpcodeByMachineID('dongguan','4')
     print('Done!')
 
 

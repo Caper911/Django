@@ -26,11 +26,6 @@
               <i class="layui-icon layui-icon-shrink-right" id="LAY_app_flexible"></i>
             </a>
           </li>
-          <li class="layui-nav-item layui-hide-xs" lay-unselect>
-            <a href="http://www.layui.com/admin/" target="_blank" title="前台">
-              <i class="layui-icon layui-icon-website"></i>
-            </a>
-          </li>
           <li class="layui-nav-item" lay-unselect>
             <a href="javascript:;" layadmin-event="refresh" title="刷新">
               <i class="layui-icon layui-icon-refresh-3"></i>
@@ -113,7 +108,9 @@
                 <dd data-name="grid">
                   <a href="javascript:;">历史数据</a>
                   <dl class="layui-nav-child">
-                    <dd data-name="list"><a lay-href="/all/">MES历史数据</a></dd>
+                    <dd data-name="grid">
+			<a lay-href="javascript:;">树莓派历史数据</a>
+		    </dd>
        
                   </dl>
                 </dd>
@@ -137,11 +134,17 @@
             <li data-name="app" class="layui-nav-item">
               <a href="javascript:;" lay-tips="应用" lay-direction="2">
                 <i class="layui-icon layui-icon-app"></i>
-                <cite>应用</cite>
+                <cite>MES数据中心</cite>
               </a>
               <dl class="layui-nav-child">
                 <dd>
-                  <a lay-href="app/message/index.html">消息中心</a>
+                  <a lay-href="/sensorDataView?location=shenzhen">深圳-MES</a>
+                </dd>
+                <dd>
+                  <a lay-href="/sensorDataView?location=dongguan">东莞-MES</a>
+                </dd>
+                <dd>
+                  <a lay-href="/sensorDataView?location=huizhou">惠州-MES</a>
                 </dd>
               </dl>
             </li>
@@ -183,12 +186,6 @@
                   </dl>
                 </dd>
               </dl>
-            </li>
-            <li data-name="get" class="layui-nav-item">
-              <a href="javascript:;" lay-href="system/get.html" lay-tips="授权" lay-direction="2">
-                <i class="layui-icon layui-icon-auz"></i>
-                <cite>授权</cite>
-              </a>
             </li>
           </ul>
         </div>

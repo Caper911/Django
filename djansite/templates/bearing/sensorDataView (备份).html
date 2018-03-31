@@ -13,8 +13,7 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="format-detection" content="telephone=no">
   
-    <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/layui.css' %}" media="all">
-    <link rel="stylesheet" href="{% static 'layuiadmin/style/admin.css' %}" media="all">
+    <link rel="stylesheet" href="{% static 'layui/css/layui.css' %}" media="all">
     
 
     <script src="{% static 'jquery-3.2.1.min.js' %}"></script>
@@ -24,26 +23,93 @@
     <script src="{% static 'highcharts/code/modules/boost.js' %}"></script>
   </head>
 
-<body>
+<body class="layui-layout-body">
+<div class="layui-layout layui-layout-admin">
+  <div class="layui-header">
+    <div class="layui-logo">数据展示</div>
+    <!-- 头部区域（可配合layui已有的水平导航） -->
+    <ul class="layui-nav layui-layout-left">
+      <li class="layui-nav-item"><a href="/index">首页</a></li>
+      <li class="layui-nav-item"><a href="">数据平台</a></li>
+      <li class="layui-nav-item"><a href="">待定选项</a></li>
+     
+      <li class="layui-nav-item">
+          <a href="javascript:;">解决方案</a>
+          <dl class="layui-nav-child"> <!-- 二级菜单 -->
+          <dd><a href="">移动模块</a></dd>
+          <dd><a href="">后台模版</a></dd>
+          <dd><a href="">电商平台</a></dd>
+          </dl>
+      </li>
+  
 
-  <style>
-  /* 这段样式只是用于演示 */
-  #LAY-component-grid-all .layui-card-body{display: flex; justify-content: center; flex-direction: column; text-align: center; height: 200px;}
-  </style>
-
-<div class="layui-fluid" id="LAY-component-grid-all">
-  <div class="layui-row layui-col-space10">
+    </ul>
+    <ul class="layui-nav layui-layout-right">
+      <li class="layui-nav-item">
+        <a href="javascript:;">
+          <img src="{% static 'images/png/favico.png' %}" class="layui-nav-img">
+          Caper911
+        <span class="layui-nav-more"></span></a>
+        <dl class="layui-nav-child">
+          <dd><a href="">基本资料</a></dd>
+          <dd><a href="">安全设置</a></dd>
+        </dl>
+      </li>
+      <li class="layui-nav-item"><a href="">注销</a></li>
+    </ul>
+  </div>
+  
+  <div class="layui-side layui-bg-black">
+    <div class="layui-side-scroll">
+      <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
+      <ul class="layui-nav layui-nav-tree" lay-filter="test">
+        <li class="layui-nav-item layui-nav-itemed">
+          <a class="" href="javascript:;">历史数据<span class="layui-nav-more"></span></a>
+          <dl class="layui-nav-child">
+            <dd><a href="javascript:;">数据查询</a></dd>
+            <dd><a href="javascript:;">数据修改</a></dd>
+            <dd><a href="javascript:;">数据处理</a></dd>
+            <dd><a href="javascript:;">数据分析</a></dd>
+          </dl>
+        </li>
+        <li class="layui-nav-item">
+          <a href="javascript:;">实时数据操作<span class="layui-nav-more"></span></a>
+          <dl class="layui-nav-child">
+            <dd><a href="javascript:;">实时分析</a></dd>
+            <dd><a href="javascript:;">实时处理</a></dd>
+            
+          </dl>
+        </li>
+        <li class="layui-nav-item">
+          <a class="" href="javascript:;">所有节点<span class="layui-nav-more"></span></a>
+          <dl class="layui-nav-child">
+            <dd><a href="/sensorDataView?location=shenzhen">深圳制造厂</a></dd>
+            <dd><a href="/sensorDataView?location=dongguan">东莞制造厂</a></dd>
+            <dd><a href="/sensorDataView?location=huizhou">惠州制造厂</a></dd>
+          </dl>
+        </li>
+      <span class="layui-nav-bar"></span></ul>
+    </div>
+  </div>
+  
+  <div class="layui-body">
+    <!-- 内容主体区域 -->
+    
+    <div style="padding: 15px;">
+      <blockquote class="layui-elem-quote">
+        layui 后台布局， 致力于让每一位开发者都能轻松搭建自己的后台模板。
+      </blockquote>
+    </div>
     <div style="margin-left: 30px">
         <div class="layui-container">
-          <div class="layui-card-header">
-            <div class="layui-col-xs12 layui-col-sm12 layui-col-md8">
-              
+          <div class="layui-row">
+            <div class="layui-col-md8">
               <form class="layui-form">
                 <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
                 <div class="layui-form-item">
                   <div class="layui-input-inline">
                     <select name="lathe" id="all-select-Machine" lay-verify="required" lay-filter="MachineID">
-                      <option value="">铣床编号</option>
+                      <option value="">车床编号</option>
                     </select>
                   </div>
                   
@@ -56,12 +122,12 @@
                   <div class="layui-input-inline">
                     <select name="sensor" lay-verify="required" lay-filter="sensor">
                       <option value="">选择传感器</option>
-                      <option value="forceX">力信号传感器(X轴)</option>
-                      <option value="forceY">力信号传感器(Y轴)</option>
-                      <option value="forceZ">力信号传感器(Z轴)</option>
-                      <option value="shakeX">振动传感器(X轴)</option>
-                      <option value="shakeY">振动传感器(Y轴)</option>
-                      <option value="shakeZ">振动传感器(Z轴)</option>
+                      <option value="forceX">压力传感器(X轴)</option>
+                      <option value="forceY">压力传感器(Y轴)</option>
+                      <option value="forceZ">压力传感器(Z轴)</option>
+                      <option value="shakeX">震动传感器(X轴)</option>
+                      <option value="shakeY">震动传感器(Y轴)</option>
+                      <option value="shakeZ">震动传感器(Z轴)</option>
                       <option value="acouEmission">声发射传感器</option></select>
                     
                   </div>
@@ -75,21 +141,21 @@
        </div>
         
        <div id="container" style="height: 400px; max-width: 1000px; margin: 0 auto"></div>
- </div>
+       
+       
+  </div>
+  
+  <div class="layui-footer">
+    <!-- 底部固定区域 -->
+    © 由 layui.com 强力驱动
+  </div>
 </div>
-
-  <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
-
-  <script>
-  layui.config({
-    base: "{% static '' %}" //静态资源所在路径
-  }).extend({
-    index: 'lib/index' //主入口模块
-  }).use(['index']);
-  </script>
-
+<script src="{% static 'layui/layui.js' %}" charset="utf-8"></script>
 <script>
-
+//JavaScript代码区域
+layui.use('element', function(){
+  var element = layui.element;
+});
 
 
 //获取url中"?"符后的字串
@@ -125,7 +191,7 @@ function loadMachineIDselect(form){
                 
                 for(var i = 0; i < data.length;i++){
                     //console.log(data[i].machineID)  
-                    $("#all-select-Machine").append("<option value=" + data[i].machineID + "> 切割铣床 No." + data[i].machineID + "</option>")           
+                    $("#all-select-Machine").append("<option value=" + data[i].machineID + "> 切割机床 No." + data[i].machineID + "</option>")           
                 }
                 form.render();   
             }
@@ -187,7 +253,7 @@ layui.use('form', function(){
         },
         success:function(data) {
             $("#all-select-times").empty();
-            $("#all-select-times").append("<option>请选择切割代号</option>");
+            $("#all-select-times").append("<option>请选择切割编号</option>");
              var time = 1;
             for(var i = 0; i < data.length;i++){
                 
