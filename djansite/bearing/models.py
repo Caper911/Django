@@ -30,6 +30,31 @@ class sensorData(models.Model):
     time = models.DateTimeField()
     opCodeID = models.ForeignKey(opStartEnddate)
     
+class RawData(models.Model):
+    forceX = models.FloatField()
+    forceY = models.FloatField()
+    forceZ = models.FloatField()
+    shakeX = models.FloatField()
+    shakeY = models.FloatField()
+    shakeZ = models.FloatField()
+    acouEmission = models.FloatField()
+    time = models.DateTimeField()
+    opCodeID = models.ForeignKey(opStartEnddate)
+
+#从RawData表中读取源数据处理后生成小波数据，并存入WaveletData中
+class WaveletData(models.Model):
+    forceX = models.FloatField()
+    forceY = models.FloatField()
+    forceZ = models.FloatField()
+    shakeX = models.FloatField()
+    shakeY = models.FloatField()
+    shakeZ = models.FloatField()
+    acouEmission = models.FloatField()
+    time = models.DateTimeField()
+    opCodeID = models.ForeignKey(opStartEnddate)
+    
+    
+    
 #class testInfo(models.Model):
 #    #info = models.FloatField()
 #    info = models.CharField(max_length=30)

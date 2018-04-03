@@ -125,7 +125,7 @@
                 <dd data-name="grid">
                   <a href="javascript:;">数据去噪</a>
                   <dl class="layui-nav-child">
-                    <dd data-name="list"><a lay-href="/all/">小波去噪</a></dd>
+                    <dd data-name="list"><a lay-href="/GridWaveletsmooth/">小波去噪</a></dd>
        
                   </dl>
                 </dd>
@@ -136,15 +136,30 @@
                 <i class="layui-icon layui-icon-app"></i>
                 <cite>MES数据中心</cite>
               </a>
-              <dl class="layui-nav-child">
-                <dd>
-                  <a lay-href="/sensorDataView?location=shenzhen">深圳-MES</a>
+		<dl class="layui-nav-child">
+                <dd data-name="grid">
+                  <a href="javascript:;">实时数据</a>
+                  <dl class="layui-nav-child">
+                    <dd data-name="list"><a lay-href="/all/">广州-MES</a></dd>
+       
+                  </dl>
                 </dd>
-                <dd>
-                  <a lay-href="/sensorDataView?location=dongguan">东莞-MES</a>
-                </dd>
-                <dd>
-                  <a lay-href="/sensorDataView?location=huizhou">惠州-MES</a>
+                <dd data-name="grid">
+                  <a href="javascript:;">历史数据</a>
+                  <dl class="layui-nav-child">
+		        <dd>
+		          <a lay-href="/sensorDataView?location=shenzhen">广州-MES</a>
+		        </dd>
+		        <dd>
+		          <a lay-href="/sensorDataView?location=shenzhen">深圳-MES</a>
+		        </dd>
+		        <dd>
+		          <a lay-href="/sensorDataView?location=dongguan">东莞-MES</a>
+		        </dd>
+		        <dd>
+		          <a lay-href="/sensorDataView?location=huizhou">惠州-MES</a>
+		        </dd>
+                  </dl>
                 </dd>
               </dl>
             </li>

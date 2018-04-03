@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from bearing.models import cpuInfo,memoryInfo,ioInfo
-from bearing.models import sensorInfo,opStartEnddate,sensorData
+from bearing.models import sensorInfo,opStartEnddate,sensorData,RawData
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import auth
 from django.contrib.auth.models import User
@@ -40,6 +40,9 @@ def register(request):
 
 def componentGridAll(request):
     return render(request,'bearing/views/component/grid/all.html')
+
+def GridWaveletsmooth(request):
+    return render(request,'bearing/views/component/grid/waveletSmooth.html')
 
 def setUserInfo(request):
     return render(request,'bearing/views/set/user/info.html')
@@ -528,7 +531,81 @@ def getOpcodeByMachineID(request):
         statue = '404'
         return JsonResponse(statue,safe=False)
 
+##############################################################
+#小波去噪函数
+import pywt
+import numpy as np
+import matplotlib.pyplot as plt
+from statsmodels.robust import mad
 
+def waveletSmooth( x, wavelet="db4", level=1, title=None ):
+    # calculate the wavelet coefficients
+    coeff = pywt.wavedec( x, wavelet)
+    # calculate a threshold
+    sigma = mad( coeff[-level] )
+    # changing this threshold also changes the behavior,
+    # but I have not played with this very much
+    uthresh = sigma * np.sqrt( 2*np.log( len( x ) ) )
+    coeff[1:] = ( pywt.threshold( i, value=uthresh, mode="soft" ) for i in coeff[1:] )
+    # reconstruct the signal using the thresholded coefficients
+    y = pywt.waverec( coeff, wavelet)
+    f, ax = plt.subplots()
+    plt.plot( x, color="r", alpha=0.5 )
+    plt.plot( y, color="b" )
+    if title:
+        ax.set_title(title)
+    ax.set_xlim((0,len(y)))
+   # plt.show()
+    return y
+
+# Test getData
+def getData():
+    sensor_id = '2'
+    sensor_name = 'forceY'
+    eacharr = []
+    if not sensor_id is None and not sensor_name is None:
+        sensor_info = RawData.objects.values(sensor_name,'time').filter(opCodeID=sensor_id)
+        for info in sensor_info:
+            eacharr.append(info[sensor_name])
+    else:
+        eacharr = []
+    return eacharr
+
+#返回小波去噪处理后的数据
+def dealWaveletData(request):
+    data = getData()
+    WaveletData = waveletSmooth(data)
+    arr = []
+    arr.append(data)
+    arr.append(WaveletData.tolist())
+    return JsonResponse(arr,safe=False)
+
+    
+################################################################
+#文件导出函数:将去燥后的数据导出至csv文件
+import csv
+from django.http import HttpResponse
+ 
+# Number of unruly passengers each year 1995 - 2005. In a real application
+# this would likely come from a database or some other back-end data store.
+UNRULY_PASSENGERS = [146,184,235,200,226,251,299,273,281,304,203]
+ 
+def getWaveletDataToCsv(request):
+  # Create the HttpResponse object with the appropriate CSV header.
+  response = HttpResponse(content_type='text/csv')
+  response['Content-Disposition'] = 'attachment; filename=OutData.csv'
+ 
+  # Create the CSV writer using the HttpResponse as the "file."
+  writer = csv.writer(response)
+  writer.writerow(['Year', 'Unruly Airline Passengers'])
+  for (year, num) in zip(range(1995, 2006), UNRULY_PASSENGERS):
+    writer.writerow([year, num])
+ 
+  return response
+
+
+    
+    
         
         
     

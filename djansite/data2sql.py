@@ -5,8 +5,9 @@ import os
 import django,datetime
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djansite.settings")
 django.setup()
+import csv
 import time
-from bearing.models import sensorInfo,opStartEnddate,sensorData
+from bearing.models import sensorInfo,opStartEnddate,sensorData,RawData
 ''' 
 ##版本的判断
 import django
@@ -39,22 +40,67 @@ def initInfo():
 
 
 def main():
-    f = open('DATA/c_4_004.txt')
-    for line in f:
-
-        endDate = datetime.datetime.now()
-        endDate = endDate + datetime.timedelta(seconds=1)
-        print(endDate)
-        time.sleep(1)
-        opCode =opStartEnddate.objects.get(opCodeID=4)
-        forceX, forceY, forceZ, shakeX, shakeY, shakeZ, acouEmission = line.split('	')
+    csv_reader = csv.reader(open('DATA/original_data.csv', encoding='utf-8'))
+    for row in csv_reader:
+        DateTime = datetime.datetime.now()
+        forceX, forceY, forceZ, shakeX, shakeY, shakeZ, acouEmission = row
         
-        info = sensorData.objects.create(forceX=forceX,forceY=forceY,forceZ=forceZ,
+        opCode =opStartEnddate.objects.get(opCodeID=2)
+
+        
+        info = RawData.objects.create(forceX=forceX,forceY=forceY,forceZ=forceZ,
                                              shakeX=shakeX,shakeY=shakeY,shakeZ=shakeZ,acouEmission=acouEmission,
-                                             time=endDate,opCodeID=opCode)
+                                             time=DateTime,opCodeID=opCode)
     info.save()
         
-    f.close()
+    
+def getData():
+    sensor_id = '2'
+    sensor_name = 'acouEmission'
+    eacharr = []
+    if not sensor_id is None and not sensor_name is None:
+        sensor_info = sensorData.objects.values(sensor_name,'time').filter(opCodeID=sensor_id)
+        for info in sensor_info:
+            eacharr.append(info[sensor_name])
+    else:
+        eacharr = []
+    return eacharr
+
+
+import pywt
+import numpy as np
+import seaborn
+import matplotlib.pyplot as plt
+from statsmodels.robust import mad
+
+def waveletSmooth( x, wavelet="db4", level=1, title=None ):
+    # calculate the wavelet coefficients
+    coeff = pywt.wavedec( x, wavelet)
+    # calculate a threshold
+    sigma = mad( coeff[-level] )
+    # changing this threshold also changes the behavior,
+    # but I have not played with this very much
+    uthresh = sigma * np.sqrt( 2*np.log( len( x ) ) )
+    coeff[1:] = ( pywt.threshold( i, value=uthresh, mode="soft" ) for i in coeff[1:] )
+    # reconstruct the signal using the thresholded coefficients
+    y = pywt.waverec( coeff, wavelet)
+    f, ax = plt.subplots()
+    plt.plot( x, color="r", alpha=0.5 )
+    plt.plot( y, color="b" )
+    if title:
+        ax.set_title(title)
+    ax.set_xlim((0,len(y)))
+    plt.show()
+    return y
+
+def test():
+    data = getData()
+    
+    y=waveletSmooth(data)
+    print(data)
+    print(y)
+
+
     
 def getSensorInfo(test):
     #sensor_id = request.GET.get('opCodeID')
@@ -62,7 +108,7 @@ def getSensorInfo(test):
     arr = []
     eacharr = []
     
-    
+
     sensor_id = 1
     sensor_name = 'forceX'
     sensor_info = sensorData.objects.values(sensor_name,'time').filter(opCodeID=sensor_id)
@@ -94,6 +140,7 @@ def getOpcodeByMachineID(location,machineID):
 if __name__ == "__main__":
     #initInfo()
     main()
+    #test()
     #getOpcodeByMachineID('dongguan','4')
     print('Done!')
 
