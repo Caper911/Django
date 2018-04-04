@@ -36,7 +36,6 @@ urlpatterns = [
     url(r'^reg/', views.register),
     url(r'^dealReg/', views.dealReg),
     url(r'^dealVerCode/',views.getPhoneSendVercode),
-    url(r'^adminindex/',views.adminindex),
     url(r'^sensorData',views.sensorDataView),
     url(r'^index$', views.index ,name ='home'),
     url(r'^ajax_dict/$',views.ajax_dict,name='ajax_dict'),

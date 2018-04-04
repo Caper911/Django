@@ -23,7 +23,7 @@ def home(request):
     return render(request,'bearing/views/home/console.html')
 
 def login(request):
-    return render(request,'bearing/user/login.html')
+    return render(request,'bearing/views/user/login.html')
 
 def logout_view(request):
 
@@ -36,7 +36,7 @@ def logout_view(request):
     return JsonResponse(arr,safe=False)
 
 def register(request):
-    return render(request,'bearing/user/reg.html')
+    return render(request,'bearing/views/user/reg.html')
 
 def componentGridAll(request):
     return render(request,'bearing/views/component/grid/all.html')
@@ -337,7 +337,7 @@ def getPhoneSendVercode(request):
         cache.set(phone, vercode, 300)
         #test
         print(vercode)
-        #SendSMS(phone,vercode)
+        SendSMS(phone,vercode)
     else:
         arr['code'] = 1
         
@@ -345,9 +345,6 @@ def getPhoneSendVercode(request):
 
 ########################################################
 
-
-def adminindex(request):
-    return render(request,'bearing/admin-index.html')
 
 def sensorDataView(request):
     return render(request,'bearing/sensorDataView.html')
@@ -559,9 +556,9 @@ def waveletSmooth( x, wavelet="db4", level=1, title=None ):
     return y
 
 # Test getData
-def getData():
-    sensor_id = '2'
-    sensor_name = 'forceY'
+def getData(sensor_id,sensor_name):
+    sensor_id = sensor_id
+    sensor_name = sensor_name
     eacharr = []
     if not sensor_id is None and not sensor_name is None:
         sensor_info = RawData.objects.values(sensor_name,'time').filter(opCodeID=sensor_id)
@@ -573,12 +570,17 @@ def getData():
 
 #返回小波去噪处理后的数据
 def dealWaveletData(request):
-    data = getData()
-    WaveletData = waveletSmooth(data)
-    arr = []
-    arr.append(data)
-    arr.append(WaveletData.tolist())
-    return JsonResponse(arr,safe=False)
+    sensor_name = request.GET.get('sensorName')
+    sensor_id = request.GET.get('sensor_id')
+    
+    sensor_id = '2'
+    if not sensor_name is None and not sensor_id is None:
+        data = getData(sensor_id,sensor_name)
+        WaveletData = waveletSmooth(data)
+        arr = []
+        arr.append(data)
+        arr.append(WaveletData.tolist())
+        return JsonResponse(arr,safe=False)
 
     
 ################################################################

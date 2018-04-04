@@ -24,8 +24,34 @@
   </style>
 
   <div class="layui-fluid" id="LAY-component-grid-all">
+
+ 
+
     <div class="layui-row layui-col-space10">
-      <div class="layui-col-xs12 layui-col-sm12 layui-col-md2 layui-col-md-offset10">
+	      <div class="layui-col-xs12 layui-col-sm12 layui-col-md8 layui-col-md-offset1">
+	       <form class="layui-form">
+                <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
+                <div class="layui-form-item">
+                
+                  <div class="layui-input-inline">
+                    <select name="sensor" lay-verify="required" lay-filter="sensor">
+                      <option value="">选择传感器</option>
+                      <option value="forceX">力信号传感器(X轴)</option>
+                      <option value="forceY">力信号传感器(Y轴)</option>
+                      <option value="forceZ">力信号传感器(Z轴)</option>
+                      <option value="shakeX">振动传感器(X轴)</option>
+                      <option value="shakeY">振动传感器(Y轴)</option>
+                      <option value="shakeZ">振动传感器(Z轴)</option>
+                      <option value="acouEmission">声发射传感器</option></select>
+                    
+                  </div>
+                  
+                </div>
+
+              </form>
+        </div>
+
+      <div class="layui-col-xs12 layui-col-sm12 layui-col-md2 layui-col-md-offset1">
 	<a href="/getWaveletDataToCsv/" class="layui-btn" target="_blank">数据导出</a>
       </div>
       <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
@@ -41,11 +67,20 @@
   <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
 
   <script>
+  layer = layui.layer;
   layui.config({
     base: "{% static '' %}" //静态资源所在路径
   }).extend({
     index: 'lib/index' //主入口模块
-  }).use(['index']);
+  }).use(['index'],function(){
+     var $ = layui.$
+
+
+
+  });
+         
+
+
   </script>
 
   <script>
@@ -69,7 +104,6 @@ Highcharts.setOptions({
        loading:"加载中",
        months:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],
        noData:"没有数据",
-       numericSymbols: [ "千" , "兆" , "G" , "T" , "P" , "E"],
        printChart:"打印图表",
        resetZoom:"恢复缩放",
        resetZoomTitle:"恢复图表",
@@ -82,7 +116,24 @@ Highcharts.setOptions({
 
 
 
-$.getJSON(/dealWaveletData/, function(data) {
+
+layui.use('form', function(){
+  var form = layui.form;                  
+        
+  //监听传感器选择下拉框，改变则重新获取数据
+  form.on('select(sensor)', function(sensorName){
+    layer.load();
+    var url = "/dealWaveletData/?";
+    url += "sensorName=";
+    url += sensorName.value;
+
+$.ajax({
+      type: "GET",
+      url: url,
+      dataType: "json",
+      success: function(data) {
+
+	layer.closeAll('loading');
 	var RawData = data[0],
 		WaveletData = data[1];
 	Highcharts.chart('container', {
@@ -98,7 +149,10 @@ $.getJSON(/dealWaveletData/, function(data) {
 			gridLineWidth: 1
 		},
 		yAxis: {
-			gridLineWidth: 1
+			gridLineWidth: 1,
+			title:{
+                          text:'传感器数值'
+                        }
 		},
 		title: {
 			text: '小波去噪对比图'
@@ -119,16 +173,70 @@ $.getJSON(/dealWaveletData/, function(data) {
 		series: [{
 			data: RawData,
 			name: '源数据',
-			lineWidth: 2
+			lineWidth: 3
 		}, {
 			data: WaveletData,
 			name: '去噪后数据',
-			lineWidth: 1.5
+			lineWidth: 1
 		}, ]
 	});
 
+	}
+
 });
+
+    
+  });
+});
+
+
+
   </script>
+  <script>
+
+	Highcharts.chart('container', {
+		chart: {
+			zoomType: 'x',
+
+		},
+		colors: ['#ADD8E6', '#FF0000'],
+		boost: {
+			useGPUTranslations: true
+		},
+		xAxis: {
+			gridLineWidth: 1
+		},
+		yAxis: {
+			gridLineWidth: 1,
+			title:{
+                          text:'传感器数值'
+                        }
+		},
+		title: {
+			text: '小波去噪对比图'
+		},
+		subtitle: {
+			text: 'Using the Boost module'
+		},
+		tooltip: {
+			valueDecimals: 2
+		},
+ 		plotOptions: {
+		    series: {
+		            marker: {
+		                enabled: false
+		            }
+                    },
+                },
+		series: [{
+			name: '源数据',
+			lineWidth: 3
+		}, {
+			name: '去噪后数据',
+			lineWidth: 1
+		}, ]
+	});
+</script>
 
 </body>
 </html>
