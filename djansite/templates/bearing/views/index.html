@@ -292,13 +292,13 @@
             content: '/ChoiceFactory/',
             btn: ['提交', '关闭'],
             yes: function (index, layero) {
-              console.log(machineID);
-              layer.closeAll();
-            },
-            end: function () {
               var iframe = $(window.parent.document).find(".layui-show > iframe");
               url = '/GridWaveletsmooth/?machineID=' + machineID;
               iframe.length == 1 ? $(iframe).attr("src",url) : window.parent.location.reload();
+              layer.closeAll();
+            },
+            btn2: function(index, layero){
+              layer.closeAll();
             }
           });
         }

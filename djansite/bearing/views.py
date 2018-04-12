@@ -512,21 +512,29 @@ def getlast19_info(request):
     return JsonResponse(infolist,safe=False)
 
 
-def getSensorInfo(request):
-    sensor_id = request.GET.get('opCodeID')
-    sensor_name = request.GET.get('sensorName')
+def getSensorData(request):
+    sensorID = request.GET.get('sensorID')
+    opCodeID = request.GET.get('runtime')
     arr = []
     eacharr = []
-    if not sensor_id is None and not sensor_name is None:
-        sensor_info = sensorData.objects.values(sensor_name,'time').filter(opCodeID=sensor_id)
-        for info in sensor_info:
-            eacharr.append((time.mktime(time.strptime(info['time'].strftime("%Y-%m-%d %H:%M:%S"),"%Y-%m-%d %H:%M:%S")))*1000)
-            eacharr.append(info[sensor_name])
+    
+    if not sensorID is None and not opCodeID is None:
+        
+        sensor = sensorInfo.objects.get(sensorID=sensorID)        
+        opStartEnd = opStartEnddate.objects.get(opCodeID=opCodeID)
+        sensor_raw_data = sensorRawData.objects.filter(Q(sensorInfo = sensor) & Q(opStartEnddate=opStartEnd)).order_by("saveDate")
+        
+        for info in sensor_raw_data:
+            
+            eacharr.append((time.mktime(time.strptime(info.saveDate.strftime("%Y-%m-%d %H:%M:%S"),"%Y-%m-%d %H:%M:%S")))*1000)
+            eacharr.append(info.sesorValue)
+            
             arr.append(eacharr)
             eacharr = []
     else:
         arr = []
     return JsonResponse(arr,safe=False)  
+
 
 
 def getCpuInfo_filter(request):
@@ -759,7 +767,7 @@ def waveletSmooth( x, wavelet="db4", level=1, title=None ):
     return y
 
 # Test getData
-def getData(sensor_id,opcode_id):
+def getRawData(sensor_id,opcode_id):
     sensorID = sensor_id
     opCodeID = opcode_id
     eacharr = []
@@ -775,24 +783,23 @@ def getData(sensor_id,opcode_id):
             eacharr.append(info.sesorValue)
     else:
         eacharr = []
-    print(eacharr[0])
     return eacharr
 
 #返回小波去噪处理后的数据
 def dealWaveletData(request):
     
-    opcode_id = request.GET.get('opcode_id')
+    opcode_id = request.GET.get('runtime')
     sensor_id = request.GET.get('sensor_id')
     
-    opcode_id = '1'
-    
-    
     if not opcode_id is None and not sensor_id is None:
-        data = getData(sensor_id,opcode_id)
+        data = getRawData(sensor_id,opcode_id)
         WaveletData = waveletSmooth(data)
         arr = []
         arr.append(data)
         arr.append(WaveletData.tolist())
+        return JsonResponse(arr,safe=False)
+    else:
+        arr = []
         return JsonResponse(arr,safe=False)
 
     

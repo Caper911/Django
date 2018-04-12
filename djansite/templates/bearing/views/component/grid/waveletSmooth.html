@@ -182,16 +182,19 @@
       var form = layui.form;
       loadSelect(form);
       //监听传感器选择下拉框，改变则重新获取数据
-
-
-
-
+      
+      var datetime ;
+      form.on('select(datetime)', function (datetimeID) {
+        datetime = datetimeID.value;
+      })
 
       form.on('select(sensor)', function (sensorID) {
         layer.load();
         var url = "/dealWaveletData/?";
         url += "sensor_id=";
         url += sensorID.value;
+        url += "&runtime=";
+        url += datetime;
 
         $.ajax({
           type: "GET",

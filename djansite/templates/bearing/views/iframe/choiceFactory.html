@@ -41,9 +41,9 @@
   <div class="layui-fluid" id="LAY-component-grid-all" style="overflow:visible">
     <div class="layui-row layui-col-space10">
       <div style="margin-left: 20px">
-        <div class="layui-container" style="overflow:visible">
+        <div class="layui-container">
           <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
-            <form class="layui-form">
+            <form class="layui-form" style="overflow:visible">
               <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
               <div class="layui-form-item">
 
@@ -119,7 +119,7 @@
 
         $.ajax({
           type: 'POST',
-          url: '/api/getDepatr',
+          url: '/api/getDepart',
           data: {
             factoryID: FactoryID.value
           },
