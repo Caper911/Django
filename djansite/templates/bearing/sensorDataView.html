@@ -36,11 +36,16 @@
     <div style="margin-left: 30px">
         <div class="layui-container">
           <div class="layui-card-header">
-            <div class="layui-col-xs12 layui-col-sm12 layui-col-md8">
+            <div class="layui-col-xs12 layui-col-sm8 layui-col-md10">
               
               <form class="layui-form">
                 <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
                 <div class="layui-form-item">
+                  <div class="layui-input-inline">
+                    <select name="lathe" id="all-select-Depart" lay-verify="required" lay-filter="departID">
+                      <option value="">选择生产部门</option>
+                    </select>
+                  </div>
                   <div class="layui-input-inline">
                     <select name="lathe" id="all-select-Machine" lay-verify="required" lay-filter="MachineID">
                       <option value="">铣床编号</option>
@@ -48,21 +53,15 @@
                   </div>
                   
                   <div class="layui-input-inline" id="select-times">
-                    <select name="lathe" id="all-select-times" lay-verify="required" lay-filter="opCode">
-                      <option value="">操作代号</option>
+                    <select name="lathe" id="all-select-sensors" lay-verify="required" lay-filter="opCode">
+                      <option value="">选择传感器</option>
                     </select>
                   </div>
                 
                   <div class="layui-input-inline">
                     <select name="sensor" lay-verify="required" lay-filter="sensor">
-                      <option value="">选择传感器</option>
-                      <option value="forceX">力信号传感器(X轴)</option>
-                      <option value="forceY">力信号传感器(Y轴)</option>
-                      <option value="forceZ">力信号传感器(Z轴)</option>
-                      <option value="shakeX">振动传感器(X轴)</option>
-                      <option value="shakeY">振动传感器(Y轴)</option>
-                      <option value="shakeZ">振动传感器(Z轴)</option>
-                      <option value="acouEmission">声发射传感器</option></select>
+                      <option value="">操作时间</option>
+
                     
                   </div>
                   
@@ -111,26 +110,30 @@ function getQueryString() {
   return args;
 }
 
-function loadMachineIDselect(form){
+
+
+function loadDepartselect(form){
         var urll = getQueryString()
-        var loca = urll["location"];
-                           
+        var ID = urll["factorID"];
+                         
         $.ajax({
             type: 'POST',
-            url: '/getMachineIDbylocation',
+            url: '/api/getDepatr',
             data: {
-                location: loca
+                factorID: ID
             },
             success:function(data) {
-                
-                for(var i = 0; i < data.length;i++){
-                    //console.log(data[i].machineID)  
-                    $("#all-select-Machine").append("<option value=" + data[i].machineID + "> 切割铣床 No." + data[i].machineID + "</option>")           
-                }
-                form.render();   
+            	$("#all-select-Depart").empty();
+            	$("#all-select-Depart").append("<option>选择生产部门</option>");
+            for(var i = 0; i < data.data.length;i++){                
+		console.log(data);  
+                $("#all-select-Depart").append("<option value=" + data.data[i].departID + "> " + data.data[i].depatrDes+ "</option>")           
+            }
+            form.render();   
             }
         })
 }
+
 </script>
 
 <script>
@@ -164,10 +167,31 @@ Highcharts.setOptions({ global: { useUTC: false } });
 
 layui.use('form', function(){
   var form = layui.form;
-  loadMachineIDselect(form);
+  loadDepartselect(form); 
+  
   var opCode;
 
+  form.on('select(departID)',function(DepartID){
+                         
+    $.ajax({
+        type: 'POST',
+        url: '/getMachine',
+        data: {
+            departID: DepartID.value
+        },
+        success:function(data) {
+            $("#all-select-Machine").empty();
+            $("#all-select-Machine").append("<option>请选择铣床</option>");
 
+            for(var i = 0; i < data.data.length;i++){                
+
+                $("#all-select-Machine").append("<option value=" + data.data[i].machineID + "> " + data.data[i].machineDes + "</option>")           
+                
+            }
+            form.render();   
+        }
+    })
+   }) 
 
   form.on('select(opCode)',function(data){
       opCode = data.value;
@@ -176,23 +200,21 @@ layui.use('form', function(){
        
   form.on('select(MachineID)',function(MachineID){
     var urll = getQueryString()
-    var loca = urll["location"];
+    //var loca = urll["location"];
                            
     $.ajax({
         type: 'POST',
-        url: '/getOpcodeByMachineID',
+        url: '/getSensor',
         data: {
-            location: loca,
             machineID: MachineID.value
         },
         success:function(data) {
-            $("#all-select-times").empty();
-            $("#all-select-times").append("<option>请选择切割代号</option>");
+            $("#all-select-sensors").empty();
+            $("#all-select-sensors").append("<option>请选择传感器</option>");
              var time = 1;
-            for(var i = 0; i < data.length;i++){
-                
-                console.log(data[i]);  
-                $("#all-select-times").append("<option value=" + data[i] + "> 第 " + time + " 次切割 </option>")           
+            for(var i = 0; i < data.data.length;i++){                
+
+                $("#all-select-sensors").append("<option value=" + data.data[i].sensorCode + "> " + data.data[i].dsensorDes + "</option>")           
                 time++;
             }
             form.render();   

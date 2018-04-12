@@ -1,7 +1,7 @@
-
-
 <!DOCTYPE html>
+
 <html>
+
 <head>
   <meta charset="utf-8">
   <title>设置我的资料</title>
@@ -12,15 +12,18 @@
   <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/layui.css' %}" media="all">
   <link rel="stylesheet" href="{% static 'layuiadmin/style/admin.css' %}" media="all">
 </head>
+
 <body>
 
   <div class="layui-fluid">
-    <div class="layui-row layui-col-space15">
+    <div class="layui-row layui-col-space12">
+
+
+
       <div class="layui-col-md12">
         <div class="layui-card">
           <div class="layui-card-header">设置我的资料</div>
-          <div class="layui-card-body" pad15>
-            
+          <div class="layui-card-body" pad30>
             <div class="layui-form" lay-filter="">
               <div class="layui-form-item">
                 <label class="layui-form-label">我的角色</label>
@@ -30,58 +33,68 @@
                     <option value="2" disabled>普通管理员</option>
                     <option value="3" disabled>审核员</option>
                     <option value="4" disabled>编辑人员</option>
-                  </select> 
+                  </select>
                 </div>
                 <div class="layui-form-mid layui-word-aux">当前角色不可更改为其它角色</div>
               </div>
               <div class="layui-form-item">
                 <label class="layui-form-label">用户名</label>
                 <div class="layui-input-inline">
-                  <input type="text" name="username" value="xianxin" readonly class="layui-input">
+                  <input type="text" name="username" value="{{ request.session.username }}" readonly class="layui-input">
                 </div>
                 <div class="layui-form-mid layui-word-aux">不可修改。一般用于后台登入名</div>
               </div>
               <div class="layui-form-item">
                 <label class="layui-form-label">昵称</label>
                 <div class="layui-input-inline">
-                  <input type="text" name="nickname" value="贤心" lay-verify="nickname" autocomplete="off" placeholder="请输入昵称" class="layui-input">
+                  <input type="text" name="nickname" value="{{ request.session.name }}" lay-verify="nickname" autocomplete="off" placeholder="请输入昵称"
+                    class="layui-input">
                 </div>
               </div>
               <div class="layui-form-item">
                 <label class="layui-form-label">性别</label>
                 <div class="layui-input-block">
+                  {% if request.session.gender == 1 %}
+                  <input type="radio" name="sex" value="男" title="男" checked>
+                  <input type="radio" name="sex" value="女" title="女">
+                  <input type="radio" name="sex" value="其他" title="其他"> {% elif request.session.gender == 2 %}
                   <input type="radio" name="sex" value="男" title="男">
                   <input type="radio" name="sex" value="女" title="女" checked>
+                  <input type="radio" name="sex" value="其他" title="其他"> {% else %}
+                  <input type="radio" name="sex" value="男" title="男">
+                  <input type="radio" name="sex" value="女" title="女">
+                  <input type="radio" name="sex" value="其他" title="其他" checked> {% endif %}
                 </div>
               </div>
               <div class="layui-form-item">
                 <label class="layui-form-label">头像</label>
                 <div class="layui-input-inline">
-                  <input name="avatar" lay-verify="required" id="LAY_avatarSrc" placeholder="图片地址" value="http://cdn.layui.com/avatar/168.jpg" class="layui-input">
+                  <input name="avatar" lay-verify="required" id="LAY_avatarSrc" placeholder="图片地址" value="http://cdn.layui.com/avatar/168.jpg"
+                    class="layui-input">
                 </div>
                 <div class="layui-input-inline layui-btn-container" style="width: auto;">
                   <button type="button" class="layui-btn layui-btn-primary" id="LAY_avatarUpload">
                     <i class="layui-icon">&#xe67c;</i>上传图片
                   </button>
-                  <button class="layui-btn layui-btn-primary" layadmin-event="avartatPreview">查看图片</button >
+                  <button class="layui-btn layui-btn-primary" layadmin-event="avartatPreview">查看图片</button>
                 </div>
-             </div>
+              </div>
               <div class="layui-form-item">
                 <label class="layui-form-label">手机</label>
                 <div class="layui-input-inline">
-                  <input type="text" name="cellphone" value="" lay-verify="phone" autocomplete="off" class="layui-input">
+                  <input type="text" name="cellphone" value="{{ request.session.phonenumber }}" lay-verify="phone" autocomplete="off" class="layui-input">
                 </div>
               </div>
               <div class="layui-form-item">
                 <label class="layui-form-label">邮箱</label>
                 <div class="layui-input-inline">
-                  <input type="text" name="email" value="" lay-verify="email" autocomplete="off" class="layui-input">
+                  <input type="text" name="email" value="{{ request.session.email }}" lay-verify="email" autocomplete="off" class="layui-input">
                 </div>
               </div>
               <div class="layui-form-item layui-form-text">
                 <label class="layui-form-label">备注</label>
                 <div class="layui-input-block">
-                  <textarea name="remarks" placeholder="请输入内容" class="layui-textarea"></textarea>
+                  <textarea name="remarks" placeholder="请输入内容" v class="layui-textarea">{{ request.session.otherText }}</textarea>
                 </div>
               </div>
               <div class="layui-form-item">
@@ -91,20 +104,56 @@
                 </div>
               </div>
             </div>
-            
           </div>
         </div>
       </div>
+
+
+
+
     </div>
   </div>
 
-  <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>  
+  <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
   <script>
-  layui.config({
-    base: "{% static 'layuiadmin/' %}" //静态资源所在路径
-  }).extend({
-    index: 'lib/index' //主入口模块
-  }).use(['index', 'set']);
+    layui.config({
+      base: "{% static 'layuiadmin/' %}" //静态资源所在路径
+    }).extend({
+      index: 'lib/index' //主入口模块
+    }).use(['index', 'set', 'upload'], function () {
+
+      var $ = layui.jquery
+        , upload = layui.upload;
+
+      //普通图片上传
+      var uploadInst = upload.render({
+        elem: '#test1'
+        , url: '/upload/'
+        , before: function (obj) {
+          //预读本地文件示例，不支持ie8
+          obj.preview(function (index, file, result) {
+            $('#demo1').attr('src', result);
+          });
+        }
+        , done: function (res) {
+          //如果上传失败
+          if (res.code > 0) {
+            return layer.msg('上传失败');
+          }
+          //上传成功
+        }
+        , error: function () {
+          //演示失败状态，并实现重传
+          var demoText = $('#demoText');
+          demoText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-mini demo-reload">重试</a>');
+          demoText.find('.demo-reload').on('click', function () {
+            uploadInst.upload();
+          });
+        }
+      })
+    });
+
   </script>
 </body>
+
 </html>

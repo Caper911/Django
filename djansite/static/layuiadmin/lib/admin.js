@@ -78,10 +78,10 @@ layui.define('view', function(exports){
           var success = options.ajax.success;
           delete options.ajax.success;
         }
-        
+        //修改了url
         admin.req($.extend(true, {
           url: '/auth/code'
-          ,type: 'get'
+          ,type: 'POST'
           ,data: {
             phone: value
           }
@@ -95,6 +95,24 @@ layui.define('view', function(exports){
             success && success(res);
           }
         }, options.ajax));
+            
+        //admin.req({
+         //url: '/dealVerCode/' //实际使用请改成服务端真实接口
+        //,data: {
+            //phone: value
+          //}
+        //,type: 'POST'
+        //,done: function(res){        
+         //layer.msg('验证码已发送至你的手机，请注意查收', {  
+           //   icon: 1
+             // ,shade: 0
+          //});
+            //options.elemVercode.focus();
+            //countDown();
+            //success && success(res);
+          //}
+       //}); //admin.req
+         
       });
     }
     

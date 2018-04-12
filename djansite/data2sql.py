@@ -4,10 +4,11 @@
 import os
 import django,datetime
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "djansite.settings")
+from django.db.models import Q
 django.setup()
 import csv
 import time
-from bearing.models import sensorInfo,opStartEnddate,sensorData,RawData
+from bearing.models import factory as fact,productDepart,machine,sensorInfo,sensorRawData,opStartEnddate
 ''' 
 ##版本的判断
 import django
@@ -16,28 +17,30 @@ if django.VERSION >= (1,7):
 '''
 
 def initInfo():
-    sensorID = 'huizhouM12'
-    location = 'huizhou'
-    description = r'Three axis vibration / force sensor and acoustic emission sensor'
-    addDate = datetime.datetime.now()
-    MachineID = 2
+    factorDes,location,areaCode,personInCharge,phoneNumber,otherInfo  = ('广州黄埔制造中心','广东省广州黄埔区大学路1号','440105','张博文','15622505458','负责制造转向器')
+    info = fact.objects.create(factorDes=factorDes,location=location,areaCode=areaCode,
+                           personInCharge=personInCharge,phoneNumber=phoneNumber,otherInfo=otherInfo)
+   
     
-    startDate = datetime.datetime.now()
-    endDate = datetime.datetime.now()+datetime.timedelta(minutes=10)
+    info = fact.objects.get(factorID='1001')
+#    depatrDes,personInCharge,otherInfo,factory = ('生产部1','李慧语','负责试产转向器订单',info)
+#    
+#    depart = productDepart.objects.create( depatrDes= depatrDes,personInCharge=personInCharge,
+#                            otherInfo=otherInfo,factory=factory)
+#    
+    depatrDes,personInCharge,otherInfo,factory = ('生产部2','李芳蔼','负责量产转向器订单',info)
     
-    infoo = sensorInfo.objects.create(sensorID=sensorID,location=location,description=description,
-                            addDate=addDate,machineID=MachineID)
-    infoo.save()
     
-    info = opStartEnddate.objects.create(startDate=startDate,endDate=endDate,sensorID=infoo)
-    time.sleep(2)
+    depart = productDepart.objects.create(departID='100002' ,depatrDes= depatrDes,personInCharge=personInCharge,
+                            otherInfo=otherInfo,factory=factory)
+    depart.save()
     
-    startDate = datetime.datetime.now()
-    endDate = datetime.datetime.now()+datetime.timedelta(minutes=10)
-    info = opStartEnddate.objects.create(startDate=startDate,endDate=endDate,sensorID=infoo)
-    info.save()
-    
+    depatrDes,personInCharge,otherInfo,factory  = ('检查部','李秦淮','负责检查转向器',info)  
 
+    depart = productDepart.objects.create(departID='100003', depatrDes= depatrDes,personInCharge=personInCharge,
+                            otherInfo=otherInfo,factory=factory)
+
+    depart.save()
 
 def main():
     csv_reader = csv.reader(open('DATA/original_data.csv', encoding='utf-8'))
@@ -124,24 +127,54 @@ def getSensorInfo(test):
     for infffff in infooo:
         print(infffff['id'])    
     
-def getOpcodeByMachineID(location,machineID):
-    machineID = machineID
-    location = location
+def getRawData(sensorID,opcodeID):
     
-    machineData = sensorInfo.objects.all().filter(location=location)
-    machineID = machineData.filter(machineID=machineID)
-    for machine in machineID:
+    sensor = sensorInfo.objects.get(sensorID=sensorID)
+    opStartEnd = opStartEnddate.objects.get(opCodeID=opcodeID)
+    
+    #Q(sensorInfo = sensor) & Q(opStartEnddate=opStartEnd)
+    
+    data = sensorRawData.objects.filter(Q(sensorInfo = sensor) & Q(opStartEnddate=opStartEnd))
+    print(data)
+    
+def getIO():
+    f = open('/proc/net/dev','r')
+    for x in range(4):
+        f.readline()
+    line = f.readline()
+    strline = line.split(' ')
+    strline2 = []
+    for a in strline:
+        if a != ' ':
+            if a!= '':
+                strline2.append(a)
+    return strline2
 
-        info = opStartEnddate.objects.prefetch_related().filter(sensorID=machine)
-        for inff in info:
-            print(inff.opCodeID)
-   
+def insertData():
+    
+    csv_reader = csv.reader(open('DATA/original_data_3000.csv', encoding='utf-8'))
+    
+    machin = machine.objects.get(machineID = '1')
+            
+    AllSensor =  sensorInfo.objects.filter(machine=machin).values("sensorID","sensorCode").distinct()
 
+    arr=list(AllSensor)
+
+    for row in csv_reader:
+        if len(arr) == len(row):
+            for i in range(len(arr)):    
+                sensor = sensorInfo.objects.get(sensorID=arr[i]['sensorID'])
+                opStartEnd = opStartEnddate.objects.get(opCodeID='1')
+                Data = sensorRawData.objects.create(sesorValue=row[i],sensorInfo = sensor,opStartEnddate=opStartEnd)
+    Data.save()    
+    
 if __name__ == "__main__":
     #initInfo()
-    main()
+    #main()
     #test()
-    #getOpcodeByMachineID('dongguan','4')
+    #getRawData('1','1')
+    #strrr = getIO()
+    insertData()
     print('Done!')
 
 

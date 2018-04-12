@@ -25,7 +25,7 @@ SECRET_KEY = '=)ddfc72x9@*4ss)etgpc9^r9aap=bd6-7ial07n-@_wm^)l7p'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 #DEBUG = False
-ALLOWED_HOSTS = ['23.105.197.30','localhost','127.0.0.1',]
+ALLOWED_HOSTS = ['23.105.197.30','localhost','127.0.0.1','192.168.123.134']
 
 
 # Application definition
@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework.authtoken',
     'bearing',
 ]
 
@@ -138,3 +139,18 @@ STATICFILES_DIRS = (
 
 #################################################################
 LOGIN_URL = '/login/'  
+
+#################################################################
+# REST_FRAMEWORK
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated', #必须有
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    )
+} 
+
+# 过期时间
+REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES = 60
+

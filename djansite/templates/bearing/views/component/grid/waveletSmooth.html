@@ -1,10 +1,9 @@
-
-
 <!DOCTYPE html>
+
 <html>
+
 <head>
-  <meta charset="utf-8">
-  {% load staticfiles %}
+  <meta charset="utf-8"> {% load staticfiles %}
   <title>小波分解</title>
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -16,48 +15,55 @@
   <script src="{% static 'highcharts/code/modules/exporting.js' %}"></script>
   <script src="{% static 'highcharts/code/modules/boost.js' %}"></script>
 </head>
+
 <body>
 
   <style>
-  /* 这段样式只是用于演示 */
-  #LAY-component-grid-all .layui-card-body{display: flex; justify-content: center; flex-direction: column; text-align: center; height: 200px;}
+    /* 这段样式只是用于演示 */
+
+    #LAY-component-grid-all .layui-card-body {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      height: 200px;
+    }
   </style>
 
   <div class="layui-fluid" id="LAY-component-grid-all">
 
- 
-
     <div class="layui-row layui-col-space10">
-	      <div class="layui-col-xs12 layui-col-sm12 layui-col-md8 layui-col-md-offset1">
-	       <form class="layui-form">
-                <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
-                <div class="layui-form-item">
-                
-                  <div class="layui-input-inline">
-                    <select name="sensor" lay-verify="required" lay-filter="sensor">
-                      <option value="">选择传感器</option>
-                      <option value="forceX">力信号传感器(X轴)</option>
-                      <option value="forceY">力信号传感器(Y轴)</option>
-                      <option value="forceZ">力信号传感器(Z轴)</option>
-                      <option value="shakeX">振动传感器(X轴)</option>
-                      <option value="shakeY">振动传感器(Y轴)</option>
-                      <option value="shakeZ">振动传感器(Z轴)</option>
-                      <option value="acouEmission">声发射传感器</option></select>
-                    
-                  </div>
-                  
-                </div>
+      <div class="layui-col-xs12 layui-col-sm12 layui-col-md8 layui-col-md-offset1">
+        <form class="layui-form">
+          <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
+          <div class="layui-form-item">
 
-              </form>
-        </div>
+            <div class="layui-input-inline">
+              <select name="sensor" id="all-select-Datetime" lay-verify="required" lay-filter="datetime">
+                <option value="">运行时间段</option>
+              </select>
+            </div>
+            <div class="layui-input-inline">
+              <select name="sensor" id="all-select-Sensor" lay-verify="required" lay-filter="sensor">
+                <option value="">请选择传感器!</option>
+
+              </select>
+            </div>
+
+          </div>
+
+        </form>
+      </div>
 
       <div class="layui-col-xs12 layui-col-sm12 layui-col-md2 layui-col-md-offset1">
-	<a href="/getWaveletDataToCsv/" class="layui-btn" target="_blank">数据导出</a>
+        <a href="/getWaveletDataToCsv/" class="layui-btn" target="_blank">数据导出</a>
       </div>
       <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
         <!-- 填充内容 -->
         <div class="layui-card">
-	   <div class="grid-demo grid-demo-bg1"><div id="container" style="max-height: 800px; max-width: 1000px; margin: 0 auto"></div></div>
+          <div class="grid-demo grid-demo-bg1">
+            <div id="container" style="max-height: 800px; max-width: 1000px; margin: 0 auto"></div>
+          </div>
         </div>
       </div>
 
@@ -67,176 +73,228 @@
   <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
 
   <script>
-  layer = layui.layer;
-  layui.config({
-    base: "{% static '' %}" //静态资源所在路径
-  }).extend({
-    index: 'lib/index' //主入口模块
-  }).use(['index'],function(){
-     var $ = layui.$
-
-
-
-  });
-         
-
+    layer = layui.layer;
+    layui.config({
+      base: "{% static 'layuiadmin/' %}" //静态资源所在路径
+    }).extend({
+      index: 'lib/index' //主入口模块
+    }).use(['index'], function () {
+      var $ = layui.$
+    });
 
   </script>
-
   <script>
+    function getQueryString() {
+      var qs = location.search.substr(1), // 获取url中"?"符后的字串  
+        args = {}, // 保存参数数据的对象
+        items = qs.length ? qs.split("&") : [], // 取得每一个参数项,
+        item = null,
+        len = items.length;
 
-$.ajaxSettings.async = false;
-
-
-Highcharts.setOptions({ global: { useUTC: false } });   
-                     
-
-$.ajaxSettings.async = true;
-Highcharts.setOptions({
-    lang:{
-       contextButtonTitle:"图表导出菜单",
-       decimalPoint:".",
-       downloadJPEG:"下载JPEG图片",
-       downloadPDF:"下载PDF文件",
-       downloadPNG:"下载PNG文件",
-       downloadSVG:"下载SVG文件",
-       drillUpText:"返回 {series.name}",
-       loading:"加载中",
-       months:["一月","二月","三月","四月","五月","六月","七月","八月","九月","十月","十一月","十二月"],
-       noData:"没有数据",
-       printChart:"打印图表",
-       resetZoom:"恢复缩放",
-       resetZoomTitle:"恢复图表",
-       shortMonths: [ "Jan" , "Feb" , "Mar" , "Apr" , "May" , "Jun" , "Jul" , "Aug" , "Sep" , "Oct" , "Nov" , "Dec"],
-       thousandsSep:",",
-       weekdays: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六","星期天"]
+      for (var i = 0; i < len; i++) {
+        item = items[i].split("=");
+        var name = decodeURIComponent(item[0]),
+          value = decodeURIComponent(item[1]);
+        if (name) {
+          args[name] = value;
+        }
+      }
+      return args;
     }
-});
-
-
-
-
-
-layui.use('form', function(){
-  var form = layui.form;                  
-        
-  //监听传感器选择下拉框，改变则重新获取数据
-  form.on('select(sensor)', function(sensorName){
-    layer.load();
-    var url = "/dealWaveletData/?";
-    url += "sensorName=";
-    url += sensorName.value;
-
-$.ajax({
-      type: "GET",
-      url: url,
-      dataType: "json",
-      success: function(data) {
-
-	layer.closeAll('loading');
-	var RawData = data[0],
-		WaveletData = data[1];
-	Highcharts.chart('container', {
-		chart: {
-			zoomType: 'x',
-
-		},
-		colors: ['#ADD8E6', '#FF0000'],
-		boost: {
-			useGPUTranslations: true
-		},
-		xAxis: {
-			gridLineWidth: 1
-		},
-		yAxis: {
-			gridLineWidth: 1,
-			title:{
-                          text:'传感器数值'
-                        }
-		},
-		title: {
-			text: '小波去噪对比图'
-		},
-		subtitle: {
-			text: 'Using the Boost module'
-		},
-		tooltip: {
-			valueDecimals: 2
-		},
- 		plotOptions: {
-		    series: {
-		            marker: {
-		                enabled: false
-		            }
-                    },
-                },
-		series: [{
-			data: RawData,
-			name: '源数据',
-			lineWidth: 3
-		}, {
-			data: WaveletData,
-			name: '去噪后数据',
-			lineWidth: 1
-		}, ]
-	});
-
-	}
-
-});
-
-    
-  });
-});
 
 
 
   </script>
   <script>
 
-	Highcharts.chart('container', {
-		chart: {
-			zoomType: 'x',
+    $.ajaxSettings.async = false;
 
-		},
-		colors: ['#ADD8E6', '#FF0000'],
-		boost: {
-			useGPUTranslations: true
-		},
-		xAxis: {
-			gridLineWidth: 1
-		},
-		yAxis: {
-			gridLineWidth: 1,
-			title:{
-                          text:'传感器数值'
-                        }
-		},
-		title: {
-			text: '小波去噪对比图'
-		},
-		subtitle: {
-			text: 'Using the Boost module'
-		},
-		tooltip: {
-			valueDecimals: 2
-		},
- 		plotOptions: {
-		    series: {
-		            marker: {
-		                enabled: false
-		            }
-                    },
+    Highcharts.setOptions({ global: { useUTC: false } });
+
+    $.ajaxSettings.async = true;
+    Highcharts.setOptions({
+      lang: {
+        contextButtonTitle: "图表导出菜单",
+        decimalPoint: ".",
+        downloadJPEG: "下载JPEG图片",
+        downloadPDF: "下载PDF文件",
+        downloadPNG: "下载PNG文件",
+        downloadSVG: "下载SVG文件",
+        drillUpText: "返回 {series.name}",
+        loading: "加载中",
+        months: ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"],
+        noData: "没有数据",
+        printChart: "打印图表",
+        resetZoom: "恢复缩放",
+        resetZoomTitle: "恢复图表",
+        shortMonths: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        thousandsSep: ",",
+        weekdays: ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期天"]
+      }
+    });
+
+    var urll = getQueryString()
+    var ID = urll["machineID"];
+    function loadSelect(form) {
+
+      $.ajax({
+        type: 'POST',
+        url: '/api/getMachineRunTime',
+        data: {
+          machineID: ID
+        },
+        success: function (data) {
+          $("#all-select-Datetime").empty();
+
+          if (data.data.length == 0) {
+            $("#all-select-Datetime").append("<option value=''> 机器从未运行过！</option>")
+          }
+          else {
+            $("#all-select-Datetime").append("<option>请选择时间段!</option>");
+            for (var i = 0; i < data.data.length; i++) {
+              $("#all-select-Datetime").append("<option value=" + data.data[i].opCodeID + "> " + data.data[i].opCodeDes + "</option>")
+            }
+          }
+
+          form.render();
+        }
+      });
+
+      $.ajax({
+        type: 'POST',
+        url: '/api/getSensor',
+        data: {
+          machineID: ID
+        },
+        success: function (data) {
+          $("#all-select-Sensor").empty();
+          $("#all-select-Sensor").append("<option>请选择传感器!</option>");
+
+          for (var i = 0; i < data.data.length; i++) {
+            $("#all-select-Sensor").append("<option value=" + data.data[i].sensorID + "> " + data.data[i].dsensorDes + "</option>")
+          }
+          form.render();
+        }
+      })
+    }
+
+    layui.use('form', function () {
+      var form = layui.form;
+      loadSelect(form);
+      //监听传感器选择下拉框，改变则重新获取数据
+
+
+
+
+
+      form.on('select(sensor)', function (sensorID) {
+        layer.load();
+        var url = "/dealWaveletData/?";
+        url += "sensor_id=";
+        url += sensorID.value;
+
+        $.ajax({
+          type: "GET",
+          url: url,
+          dataType: "json",
+          success: function (data) {
+            layer.closeAll('loading');
+            var RawData = data[0],
+              WaveletData = data[1];
+            Highcharts.chart('container', {
+              chart: {
+                zoomType: 'x',
+              },
+              colors: ['#ADD8E6', '#FF0000'],
+              boost: {
+                useGPUTranslations: true
+              },
+              xAxis: {
+                gridLineWidth: 1
+              },
+              yAxis: {
+                gridLineWidth: 1,
+                title: {
+                  text: '传感器数值'
+                }
+              },
+              title: {
+                text: '小波去噪对比图'
+              },
+              subtitle: {
+                text: 'Using the Boost module'
+              },
+              tooltip: {
+                valueDecimals: 3
+              },
+              plotOptions: {
+                series: {
+                  marker: {
+                    enabled: false
+                  }
                 },
-		series: [{
-			name: '源数据',
-			lineWidth: 3
-		}, {
-			name: '去噪后数据',
-			lineWidth: 1
-		}, ]
-	});
-</script>
+              },
+              series: [{
+                data: RawData,
+                name: '源数据',
+                lineWidth: 3
+              }, {
+                data: WaveletData,
+                name: '去噪后数据',
+                lineWidth: 1
+              },]
+            });
+          }
+        });
+
+      });
+    });
+  </script>
+
+  <script>
+    Highcharts.chart('container', {
+      chart: {
+        zoomType: 'x',
+      },
+      colors: ['#ADD8E6', '#FF0000'],
+      boost: {
+        useGPUTranslations: true
+      },
+      xAxis: {
+        gridLineWidth: 1
+      },
+      yAxis: {
+        gridLineWidth: 1,
+        title: {
+          text: '传感器数值'
+        }
+      },
+      title: {
+        text: '小波去噪对比图'
+      },
+      subtitle: {
+        text: 'Using the Boost module'
+      },
+      tooltip: {
+        valueDecimals: 2
+      },
+      plotOptions: {
+        series: {
+          marker: {
+            enabled: false
+          }
+        },
+      },
+      series: [{
+        name: '源数据',
+        lineWidth: 3
+      }, {
+        name: '去噪后数据',
+        lineWidth: 1
+      },]
+    });
+  </script>
 
 </body>
+
 </html>

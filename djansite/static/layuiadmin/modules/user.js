@@ -47,18 +47,18 @@ layui.define('form', function(exports){
     ,elemPhone: '#LAY-user-login-cellphone'
     ,elemVercode: '#LAY-user-login-vercode'
     ,ajax: {
-      url: layui.setter.base + 'json/user/sms.js' //实际使用请改成服务端真实接口
+      url: '/dealVerCode/' 
     }
   });
   
-  
-  
-  
   //更换图形验证码
+  //this.src = 'https://127.0.0.1/user/captcha/?t='+ new Date().getTime()
   $body.on('click', '#LAY-user-get-vercode', function(){
     var othis = $(this);
-    this.src = 'https://www.oschina.net/action/user/captcha?t='+ new Date().getTime()
+    this.src = '/user/captcha/?t='+ new Date().getTime()
+
   });
+  
   
   //对外暴露的接口
   exports('user', {});

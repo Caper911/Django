@@ -1,6 +1,9 @@
 from django.shortcuts import render
+
 from bearing.models import cpuInfo,memoryInfo,ioInfo
-from bearing.models import sensorInfo,opStartEnddate,sensorData,RawData
+
+from bearing.models import factory,productDepart,machine,sensorInfo,opStartEnddate,machineRunTime
+from bearing.models import sensorRawData,sensorWaveletData
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import auth
 from django.contrib.auth.models import User
@@ -12,15 +15,18 @@ import sys
 import datetime
 import time
 import random
+from django.db.models import Q
 
 
 # Create your views here.
-#@login_required 
+@login_required 
 def index(request):
     return render(request,'bearing/views/index.html')
 
+
 def home(request):
     return render(request,'bearing/views/home/console.html')
+
 
 def login(request):
     return render(request,'bearing/views/user/login.html')
@@ -41,12 +47,26 @@ def register(request):
 def componentGridAll(request):
     return render(request,'bearing/views/component/grid/all.html')
 
+def ChoiceFactory(request):
+    return render(request,'bearing/views/iframe/choiceFactory.html')
+
 def GridWaveletsmooth(request):
     return render(request,'bearing/views/component/grid/waveletSmooth.html')
 
+def Map(request):
+    return render(request,'bearing/views/map/map.html')
+
+def testapi(request):
+    data = {"code":0,"msg":"","count":1000,"data":[{"id":10000,"username":"user-0","sex":"女","city":"城市-0","sign":"签名-0","experience":255,"logins":24,"wealth":82830700,"classify":"作家","score":57},{"id":10001,"username":"user-1","sex":"男","city":"城市-1","sign":"签名-1","experience":884,"logins":58,"wealth":64928690,"classify":"词人","score":27},{"id":10002,"username":"user-2","sex":"女","city":"城市-2","sign":"签名-2","experience":650,"logins":77,"wealth":6298078,"classify":"酱油","score":31},{"id":10003,"username":"user-3","sex":"女","city":"城市-3","sign":"签名-3","experience":362,"logins":157,"wealth":37117017,"classify":"诗人","score":68},{"id":10004,"username":"user-4","sex":"男","city":"城市-4","sign":"签名-4","experience":807,"logins":51,"wealth":76263262,"classify":"作家","score":6},{"id":10005,"username":"user-5","sex":"女","city":"城市-5","sign":"签名-5","experience":173,"logins":68,"wealth":60344147,"classify":"作家","score":87},{"id":10006,"username":"user-6","sex":"女","city":"城市-6","sign":"签名-6","experience":982,"logins":37,"wealth":57768166,"classify":"作家","score":34},{"id":10007,"username":"user-7","sex":"男","city":"城市-7","sign":"签名-7","experience":727,"logins":150,"wealth":82030578,"classify":"作家","score":28},{"id":10008,"username":"user-8","sex":"男","city":"城市-8","sign":"签名-8","experience":951,"logins":133,"wealth":16503371,"classify":"词人","score":14},{"id":10009,"username":"user-9","sex":"女","city":"城市-9","sign":"签名-9","experience":484,"logins":25,"wealth":86801934,"classify":"词人","score":75}]}
+    return JsonResponse(data,safe=False)
+
+def role(request):
+    return render(request,'bearing/views/authority/role.html')
+
+@login_required 
 def setUserInfo(request):
     return render(request,'bearing/views/set/user/info.html')
-
+@login_required 
 def setUserPassword(request):
     return render(request,'bearing/views/set/user/password.html')
 
@@ -55,6 +75,143 @@ def setSystemWebsite(request):
 
 def setSystemEmail(request):
     return render(request,'bearing/views/set/system/email.html')
+
+#######################################################################################
+#账号密码登录处理函数
+#{
+#  "code": 0
+#  ,"msg": "登入成功"
+#  ,"data": {
+#    "access_token": "c262e61cd13ad99fc650e6908c7e5e65b63d2f32185ecfed6b801ee3fbdd5c0a"
+#  }
+#}
+
+def dealLogin(request):
+    arr = {"code":0,"msg":"登录成功!","data":{}}
+
+    if request.method == "POST" and request.POST:
+        vercode = request.POST['vercode']
+        print(vercode)
+        print(request.session['VerCodeKey'].upper())
+        if vercode.upper() == request.session['VerCodeKey'].upper():
+            
+            if 'fav_color' in request.session:
+               del request.session['VerCodeKey']  
+            
+            username = request.POST['username']
+            password = request.POST['password']
+            
+            result = authenticate(username=username,password=password)
+            
+            if result is not None and result.is_active:
+                request.session["username"] = result.username
+                request.session["phonenumber"] = result.profile.phonenumber
+                request.session["name"] = result.first_name
+                request.session["gender"]  = result.profile.gender           
+                request.session["otherText"] = result.profile.otherText
+                request.session["email"] = result.email              
+                auth.login(request,result)
+                
+                return JsonResponse(arr,safe=False)
+            
+            else:
+                arr['code'] = 1
+                arr['msg'] = "用户名或密码不正确!"
+                return JsonResponse(arr,safe=False)
+        else:
+            arr['code'] = 1
+            arr['msg'] = "验证码不正确，请重新尝试!"
+    else:
+        arr['code'] = 1
+        arr['msg'] = "请求方式错误，需POST方法."
+    
+    return JsonResponse(arr,safe=False)
+
+#######################################################################################
+#用户信息修改处理函数
+#{
+#  "code": 0
+#  ,"msg": "登入成功"
+#  ,"data": {
+#    
+#  }
+#}
+
+def dealUserChange(request):
+    arr = {"code":0,"msg":"信息修改成功!","data":{}}
+
+    if request.method == "POST" and request.POST and request.user.is_authenticated:
+            
+            user = User.objects.get(username=request.user.get_username())
+            
+            if user is not None :
+                user.profile.phonenumber = request.POST['cellphone']
+                user.first_name = request.POST['nickname']
+                user.profile.otherText = request.POST['remarks']
+                user.email = request.POST['email']
+                if request.POST['sex'] == '女':
+                    user.profile.gender = 2
+                elif request.POST['sex'] == '男':
+                    user.profile.gender = 1
+                elif request.POST['sex'] == '其他':
+                    user.profile.gender = 0
+                user.save()
+                
+                request.session["phonenumber"] = user.profile.phonenumber
+                request.session["name"] = user.first_name
+                request.session["gender"]  = user.profile.gender  
+                request.session["otherText"] = user.profile.otherText
+                request.session["email"] = user.email 
+                
+                return JsonResponse(arr,safe=False)         
+            else:
+                arr['code'] = 1
+                arr['msg'] = "未知错误，联系管理员!"
+                return JsonResponse(arr,safe=False)
+
+    else:
+        arr['code'] = 1
+        arr['msg'] = "请求方式错误，需POST方法."
+    
+    return JsonResponse(arr,safe=False)
+
+#######################################################################################
+#用户密码修改函数函数
+#{
+#  "code": 0
+#  ,"msg": "密码修改成功！"
+#  ,"data": {
+#    
+#  }
+#}
+
+def dealUserPasswrod(request):
+    arr = {"code":0,"msg":"密码修改成功，请重新登录！","data":{}}
+
+    if request.method == "POST" and request.POST and request.user.is_authenticated:
+            
+            password = request.POST['oldPassword']
+
+            user = authenticate(username=request.user.get_username(),password=password)
+           
+            if user is not None :
+                newPassword = request.POST['password']
+                
+                user.set_password(newPassword)
+                
+                user.save()
+                
+                return JsonResponse(arr,safe=False)         
+            else:
+                arr['code'] = 1
+                arr['msg'] = "旧密码输入错误，请重新输入！"
+                return JsonResponse(arr,safe=False)
+
+    else:
+        arr['code'] = 1
+        arr['msg'] = "请求方式错误，需POST方法."
+    
+    return JsonResponse(arr,safe=False)
 
 #############################################################################
 #发送短信验证码
@@ -137,13 +294,16 @@ def dealReg(request):
             nickname = request.POST['nickname']
             password = request.POST['password']
             
-    
-            save = User.objects.create_user(username=nickname,password=password)
-            save.profile.phonenumber = cellphone
+            filterResult=User.objects.filter(username=nickname)
+            if filterResult.exists():
+                arr['msg'] = "该用户名称已存在，请重新输入"
+            else:
+                save = User.objects.create_user(username=nickname,password=password)
+                save.profile.phonenumber = cellphone
             
-            save.save()
-            arr['code'] = 0
-            return JsonResponse(arr,safe=False)
+                save.save()
+                arr['code'] = 0
+                return JsonResponse(arr,safe=False) 
         else:
             arr['msg'] = "验证码不正确，请重新尝试"
             return JsonResponse(arr,safe=False)
@@ -153,51 +313,7 @@ def dealReg(request):
         
     return JsonResponse(arr,safe=False)
 
-#######################################################################################
-#账号密码登录处理函数
-#{
-#  "code": 0
-#  ,"msg": "登入成功"
-#  ,"data": {
-#    "access_token": "c262e61cd13ad99fc650e6908c7e5e65b63d2f32185ecfed6b801ee3fbdd5c0a"
-#  }
-#}
 
-def dealLogin(request):
-    arr = {"code":0,"msg":"登录成功!","data":{}}
-
-    if request.method == "POST" and request.POST:
-        vercode = request.POST['vercode']
-        print(vercode)
-        print(request.session['VerCodeKey'].upper())
-        if vercode.upper() == request.session['VerCodeKey'].upper():
-            
-            if 'fav_color' in request.session:
-               del request.session['VerCodeKey']  
-            
-            username = request.POST['username']
-            password = request.POST['password']
-            
-            result = authenticate(username=username,password=password)
-            
-            if result is not None and result.is_active:
-                request.session["username"] = result.username
-                auth.login(request,result)
-                
-                return JsonResponse(arr,safe=False)
-            
-            else:
-                arr['code'] = 1
-                arr['msg'] = "用户名或密码不正确!"
-                return JsonResponse(arr,safe=False)
-        else:
-            arr['code'] = 1
-            arr['msg'] = "验证码不正确，请重新尝试!"
-    else:
-        arr['code'] = 1
-        arr['msg'] = "请求方式错误，需POST方法."
-    
-    return JsonResponse(arr,safe=False)
 
 
 #######################################################
@@ -328,6 +444,7 @@ def captcha(request):
 #    
 #  }
 #}
+@login_required 
 def getPhoneSendVercode(request):
     arr = {"code":0,"msg":"验证码已成功发送，请注意查收","data":{}}
     if request.method == "POST" and request.POST:
@@ -337,7 +454,7 @@ def getPhoneSendVercode(request):
         cache.set(phone, vercode, 300)
         #test
         print(vercode)
-        SendSMS(phone,vercode)
+        #SendSMS(phone,vercode)
     else:
         arr['code'] = 1
         
@@ -489,26 +606,112 @@ def saveInfo(request):
         
 ################################################################################        
 # 样式动态设置
-#下拉框
-def getMachineIDbylocation(request):
-    statue = ""
+#导航栏
+#arr = {"code":200,"msg":"成功!","data":{}}
+@login_required 
+def getNav(request):
+    arr = {"code":200,"msg":"成功!","data":[]}
+    if request.method == "POST":
+        AllFactoryInfo =  factory.objects.all().values("factorID","factorDes").distinct()
+        arr['data']=list(AllFactoryInfo)
+    else:
+        arr['code'] = 500
+        arr['msg'] = '获取失败,请使用POST方法!'
+        
+    return JsonResponse(arr,safe=False)     
+
+#部门名称下拉框
+def getDepart(request):
+    arr = {"code":0,"msg":"成功!","data":[]}
     #检测请求的方式是post，并且post请求有数据
     if request.method == "POST" and request.POST:
-        location = request.POST['location']
-        arr = []
-        if not location is None:    
-            AllMachineID =  sensorInfo.objects.filter(location=location ).values("machineID").distinct()
-            for MachineID in AllMachineID:
-                arr.append(MachineID)
+        factorID = request.POST['factoryID']
+        if not factorID is None :
+            factor = factory.objects.get(factorID = factorID)
+            
+            AllDepart =  productDepart.objects.filter(factory=factor).values("departID","depatrDes").distinct()
+            arr['data'] = list(AllDepart)
         else:
-            arr = []
+            arr['code'] = 1
+            arr['msg'] = '参数错误!'
         return JsonResponse(arr,safe=False)
     else:
-        statue = '404'
-        return JsonResponse(statue,safe=False)
+        arr['code'] = 1
+        arr['msg'] = '错误，请求方式务必为POST!'
+        return JsonResponse(arr,safe=False)
+
+
+#机床名称下拉框
+def getMachine(request):
+    arr = {"code":0,"msg":"成功!","data":[]}
+    #检测请求的方式是post，并且post请求有数据
+    if request.method == "POST" and request.POST:
+        departID = request.POST['departID']
+        if not departID is None :
+            depart = productDepart.objects.get(departID = departID)
+            
+            AllMachine =  machine.objects.filter(productDepart=depart ).values("machineID","machineDes").distinct()
+            arr['data'] = list(AllMachine)
+        else:
+            arr['code'] = 1
+            arr['msg'] = '参数错误!'
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 1
+        arr['msg'] = '错误，请求方式务必为POST!'
+        return JsonResponse(arr,safe=False)
     
+    
+#传感器下拉框
+def getSensor(request):
+    arr = {"code":0,"msg":"成功!","data":{}}
+    #检测请求的方式是post，并且post请求有数据
+    if request.method == "POST" and request.POST:
+
+        machineID = request.POST['machineID']
+        
+        if not machineID is None :
+            machin = machine.objects.get(machineID = machineID)
+            
+            AllSensor =  sensorInfo.objects.filter(machine=machin).values("sensorID","dsensorDes").distinct()
+
+            arr['data']=list(AllSensor)
+        else:
+            arr['code'] = 1
+            arr['msg'] = '参数错误!'
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 1
+        arr['msg'] = '错误，请求方式务必为POST!'
+        return JsonResponse(arr,safe=False)
+ 
+def getMachineRunTime(request):
+    arr = {"code":0,"msg":"成功!","data":{}}
+    #检测请求的方式是post，并且post请求有数据
+    if request.method == "POST" and request.POST:
+
+        machineID = request.POST['machineID']
+        
+        if not machineID is None :
+            dat = []
+            machin = machine.objects.get(machineID = machineID)
+            
+            AllRunTime =  machineRunTime.objects.filter(machine=machin).distinct()
+            for RunTime in AllRunTime:
+                dat.append({'opCodeID':RunTime.opStartEnddate.opCodeID,'opCodeDes':str(RunTime.opStartEnddate)})
+            arr['data']=dat
+        else:
+            arr['code'] = 1
+            arr['msg'] = '参数错误!'
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 1
+        arr['msg'] = '错误，请求方式务必为POST!'
+        return JsonResponse(arr,safe=False)
+    
+
 def getOpcodeByMachineID(request):
-    statue = ""
+    
     arr = []
     #检测请求的方式是post，并且post请求有数据
     if request.method == "POST" and request.POST:
@@ -556,26 +759,36 @@ def waveletSmooth( x, wavelet="db4", level=1, title=None ):
     return y
 
 # Test getData
-def getData(sensor_id,sensor_name):
-    sensor_id = sensor_id
-    sensor_name = sensor_name
+def getData(sensor_id,opcode_id):
+    sensorID = sensor_id
+    opCodeID = opcode_id
     eacharr = []
-    if not sensor_id is None and not sensor_name is None:
-        sensor_info = RawData.objects.values(sensor_name,'time').filter(opCodeID=sensor_id)
-        for info in sensor_info:
-            eacharr.append(info[sensor_name])
+    
+    #Q(sensorInfo = sensor) & Q(opStartEnddate=opStartEnd)
+    
+    sensor = sensorInfo.objects.get(sensorID=sensorID)
+    opStartEnd = opStartEnddate.objects.get(opCodeID=opCodeID)
+    
+    if not sensor_id is None and not opcode_id is None:
+        sensor_raw_data = sensorRawData.objects.filter(Q(sensorInfo = sensor) & Q(opStartEnddate=opStartEnd)).order_by("saveDate")
+        for info in sensor_raw_data:
+            eacharr.append(info.sesorValue)
     else:
         eacharr = []
+    print(eacharr[0])
     return eacharr
 
 #返回小波去噪处理后的数据
 def dealWaveletData(request):
-    sensor_name = request.GET.get('sensorName')
+    
+    opcode_id = request.GET.get('opcode_id')
     sensor_id = request.GET.get('sensor_id')
     
-    sensor_id = '2'
-    if not sensor_name is None and not sensor_id is None:
-        data = getData(sensor_id,sensor_name)
+    opcode_id = '1'
+    
+    
+    if not opcode_id is None and not sensor_id is None:
+        data = getData(sensor_id,opcode_id)
         WaveletData = waveletSmooth(data)
         arr = []
         arr.append(data)

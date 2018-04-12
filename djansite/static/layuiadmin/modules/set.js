@@ -52,6 +52,7 @@ layui.define(['form', 'upload'], function(exports){
   form.on('submit(set_website)', function(obj){
     layer.msg(JSON.stringify(obj.field));
     
+
     //提交修改
     /*
     admin.req({
@@ -62,6 +63,7 @@ layui.define(['form', 'upload'], function(exports){
       }
     });
     */
+
     return false;
   });
   
@@ -85,19 +87,20 @@ layui.define(['form', 'upload'], function(exports){
   
   //设置我的资料
   form.on('submit(setmyinfo)', function(obj){
-    layer.msg(JSON.stringify(obj.field));
     
     //提交修改
-    /*
     admin.req({
-      url: ''
+      url: '/api/dealUserChange/'
+      ,type: 'POST'
       ,data: obj.field
-      ,success: function(){
-        
+      ,error : function(data) {
+        layer.msg(data.msg);
+      }
+      ,success: function(data){
+        layer.msg(data.msg);
       }
     });
-    */
-    return false;
+
   });
 
   //上传头像
@@ -133,19 +136,28 @@ layui.define(['form', 'upload'], function(exports){
   
   //设置密码
   form.on('submit(setmypass)', function(obj){
-    layer.msg(JSON.stringify(obj.field));
     
     //提交修改
-    /*
+    
     admin.req({
-      url: ''
+      url: '/api/dealUserPasswrod/'
+      ,type: 'POST'
       ,data: obj.field
-      ,success: function(){
-        
+      ,error : function(data) {
+        layer.msg(data.msg);
+      }
+      ,success: function(data){
+        layer.msg(data.msg, {
+      	    icon: 1
+           ,time: 700
+	   ,offset: 'auto'
+           ,end:function(){
+		location.href='/login/';
+	   }
+	});
       }
     });
-    */
-    return false;
+    
   });
   
   //对外暴露的接口

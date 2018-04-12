@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  {% load staticfiles %}
+  <title>制造工厂地理分布</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/layui.css' %}" media="all">
+  <link rel="stylesheet" href="{% static 'layuiadmin/style/admin.css' %}" media="all">
+  <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=a16P9tt6uGMsD3YLIhyBm9pBEUUEelwV"></script>
+</head>
+<body>
+	
+  <style type="text/css">
+   #allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+  </style>
+  <style>
+  /* 这段样式只是用于演示 */
+  #LAY-component-grid-all .layui-card-body{display: flex; justify-content: center; flex-direction: column; text-align: center; height: 200px;}
+  </style>
+
+  <div class="layui-fluid" id="LAY-component-grid-all">
+
+    <div class="layui-row layui-col-space10">
+	     
+      <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
+        <!-- 填充内容 -->
+        <div class="layui-card">
+	  <div class="layui-card-header">制造工厂地理分布</div>
+	  <div class="layui-card-body" style="height:480px"><div id="allmap" ></div></div>
+	   
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
+
+  <script>
+  layer = layui.layer;
+  layui.config({
+    base: "{% static 'layuiadmin/' %}" //静态资源所在路径
+  }).extend({
+    index: 'lib/index' //主入口模块
+  }).use(['index'],function(){
+     var $ = layui.$
+
+  });
+         
+ </script>
+
+ <script type="text/javascript">
+	map = new BMap.Map("allmap");
+	map.centerAndZoom(new BMap.Point(113.881151,22.909098), 10);
+	var data_info = [[113.881151,22.909098,"地址：东莞市松山湖区大学路一号东莞理工学院"],
+			 [113.858916,22.745379,"地址：深圳市沙井镇芙蓉工业区一号"],
+			 [114.112055,23.188117,"地址：惠州市博罗县龙华镇龙腾工业区"]
+					];
+	var opts = {
+			width : 250,     // 信息窗口宽度
+			height: 80,     // 信息窗口高度
+			title : "信息窗口" , // 信息窗口标题
+			enableMessage:true//设置允许信息窗发送短息
+	};
+
+	for(var i=0;i<data_info.length;i++){
+		var marker = new BMap.Marker(new BMap.Point(data_info[i][0],data_info[i][1]));  // 创建标注
+		var content = data_info[i][2];
+		map.addOverlay(marker);               // 将标注添加到地图中
+		addClickHandler(content,marker);
+	}
+	function addClickHandler(content,marker){
+		marker.addEventListener("click",function(e){
+			openInfo(content,e)}
+		);
+	}
+	function openInfo(content,e){
+		var p = e.target;
+		var point = new BMap.Point(p.getPosition().lng, p.getPosition().lat);
+		var infoWindow = new BMap.InfoWindow(content,opts);  // 创建信息窗口对象 
+		map.openInfoWindow(infoWindow,point); //开启信息窗口
+	}
+	map.enableScrollWheelZoom(true);     //开启鼠标滚轮缩放
+	map.setMapStyle({style:'midnight'})
+
+ </script>
+
+</body>
+</html>

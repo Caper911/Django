@@ -108,7 +108,7 @@
       
       //请求接口
       admin.req({
-        url: '/dealReg/' //实际使用请改成服务端真实接口
+        url: '/dealReg/' 
         ,data: field
         ,type: 'POST'
         ,done: function(res){        
@@ -117,7 +117,7 @@
             ,icon: 1
             ,time: 1500
           }, function(){
-            location.hash = '/login/'; //跳转到登入页
+            location.href = '/login/'; //跳转到登入页
           });
         }
       });

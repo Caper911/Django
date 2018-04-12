@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
-  <meta charset="utf-8"> {% load staticfiles %}
+  
+  <meta charset="utf-8">
+  {% load staticfiles %}
   <title>工控平台中心 - Admin</title>
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
@@ -12,12 +12,11 @@
   <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/layui.css' %}" media="all">
   <link rel="stylesheet" href="{% static 'layuiadmin/style/admin.css' %}" media="all">
   <script src="{% static 'jquery-3.2.1.min.js' %}"></script>
-
+  
 
 </head>
-
 <body class="layui-layout-body">
-
+  
   <div id="LAY_app">
     <div class="layui-layout layui-layout-admin">
       <div class="layui-header">
@@ -35,11 +34,11 @@
           </li>
         </ul>
         <ul class="layui-nav layui-layout-right" lay-filter="layadmin-layout-right">
-
+          
           <li class="layui-nav-item" lay-unselect>
             <a lay-href="app/message/index.html" layadmin-event="message" lay-text="消息中心">
-              <i class="layui-icon layui-icon-notice"></i>
-
+              <i class="layui-icon layui-icon-notice"></i>  
+              
               <!-- 如果有新消息，则显示小圆点 -->
               <span class="layui-badge-dot"></span>
             </a>
@@ -59,39 +58,29 @@
               <cite>{{ request.session.username }}</cite>
             </a>
             <dl class="layui-nav-child">
-              <dd>
-                <a lay-href="/setUserInfo/">基本资料</a>
-              </dd>
-              <dd>
-                <a lay-href="/setUserPassword/">修改密码</a>
-              </dd>
+              <dd><a lay-href="/setUserInfo/">基本资料</a></dd>
+              <dd><a lay-href="/setUserPassword/">修改密码</a></dd>
               <hr>
-              <dd layadmin-event="logout" style="text-align: center;">
-                <a>退出</a>
-              </dd>
+              <dd layadmin-event="logout" style="text-align: center;"><a>退出</a></dd>
             </dl>
           </li>
-
+          
           <li class="layui-nav-item layui-hide-xs" lay-unselect>
-            <a href="javascript:;" layadmin-event="about">
-              <i class="layui-icon layui-icon-more-vertical"></i>
-            </a>
+            <a href="javascript:;" layadmin-event="about"><i class="layui-icon layui-icon-more-vertical"></i></a>
           </li>
           <li class="layui-nav-item layui-show-xs-inline-block layui-hide-sm" lay-unselect>
-            <a href="javascript:;" layadmin-event="more">
-              <i class="layui-icon layui-icon-more-vertical"></i>
-            </a>
+            <a href="javascript:;" layadmin-event="more"><i class="layui-icon layui-icon-more-vertical"></i></a>
           </li>
         </ul>
       </div>
-
+      
       <!-- 侧边菜单 -->
       <div class="layui-side layui-side-menu">
         <div class="layui-side-scroll">
           <div class="layui-logo" lay-href="home/console.html">
             <span>工控平台中心</span>
           </div>
-
+          
           <ul class="layui-nav layui-nav-tree" lay-shrink="all" id="LAY-system-side-menu" lay-filter="layadmin-system-side-menu">
             <li data-name="home" class="layui-nav-item">
               <a href="javascript:;" lay-tips="主页" lay-direction="2">
@@ -113,19 +102,17 @@
                 <dd data-name="grid">
                   <a href="javascript:;">实时数据</a>
                   <dl class="layui-nav-child">
-                    <dd data-name="list">
-                      <a lay-href="/all/">树莓派实时数据</a>
-                    </dd>
-
+                    <dd data-name="list"><a lay-href="/all/">树莓派实时数据</a></dd>
+       
                   </dl>
                 </dd>
                 <dd data-name="grid">
                   <a href="javascript:;">历史数据</a>
                   <dl class="layui-nav-child">
                     <dd data-name="grid">
-                      <a lay-href="javascript:;">树莓派历史数据</a>
-                    </dd>
-
+			<a lay-href="javascript:;">树莓派历史数据</a>
+		    </dd>
+       
                   </dl>
                 </dd>
               </dl>
@@ -139,10 +126,8 @@
                 <dd data-name="grid">
                   <a href="javascript:;">数据去噪</a>
                   <dl class="layui-nav-child">
-                    <dd data-name="list">
-                      <a lay-href="/GridWaveletsmooth/" id="Wavelet" data-method="Wavelet">小波去噪</a>
-                    </dd>
-
+                    <dd data-name="list"><a lay-href="/GridWaveletsmooth/">小波去噪</a></dd>
+       
                   </dl>
                 </dd>
               </dl>
@@ -152,14 +137,12 @@
                 <i class="layui-icon layui-icon-app"></i>
                 <cite>MES数据中心</cite>
               </a>
-              <dl class="layui-nav-child">
+		<dl class="layui-nav-child">
                 <dd data-name="grid">
                   <a href="javascript:;">实时数据</a>
                   <dl id="mesLiveData" class="layui-nav-child">
-                    <dd data-name="list">
-                      <a lay-href="/all/">广州-MES</a>
-                    </dd>
-
+                    <dd data-name="list"><a lay-href="/all/">广州-MES</a></dd>
+       
                   </dl>
                 </dd>
                 <dd data-name="grid">
@@ -199,23 +182,15 @@
                 <dd>
                   <a href="javascript:;">系统设置</a>
                   <dl class="layui-nav-child">
-                    <dd>
-                      <a lay-href="setSystemWebsite">网站设置</a>
-                    </dd>
-                    <dd>
-                      <a lay-href="setSystemEmail">邮件服务</a>
-                    </dd>
+                    <dd><a lay-href="setSystemWebsite">网站设置</a></dd>
+                    <dd><a lay-href="setSystemEmail">邮件服务</a></dd>
                   </dl>
                 </dd>
                 <dd>
                   <a href="javascript:;">我的设置</a>
                   <dl class="layui-nav-child">
-                    <dd>
-                      <a lay-href="/setUserInfo/">基本资料</a>
-                    </dd>
-                    <dd>
-                      <a lay-href="/setUserPassword/">修改密码</a>
-                    </dd>
+                    <dd><a lay-href="/setUserInfo/">基本资料</a></dd>
+                    <dd><a lay-href="/setUserPassword/">修改密码</a></dd>
                   </dl>
                 </dd>
               </dl>
@@ -233,36 +208,28 @@
             <li class="layui-nav-item" lay-unselect>
               <a href="javascript:;"></a>
               <dl class="layui-nav-child layui-anim-fadein">
-                <dd layadmin-event="closeThisTabs">
-                  <a href="javascript:;">关闭当前标签页</a>
-                </dd>
-                <dd layadmin-event="closeOtherTabs">
-                  <a href="javascript:;">关闭其它标签页</a>
-                </dd>
-                <dd layadmin-event="closeAllTabs">
-                  <a href="javascript:;">关闭全部标签页</a>
-                </dd>
+                <dd layadmin-event="closeThisTabs"><a href="javascript:;">关闭当前标签页</a></dd>
+                <dd layadmin-event="closeOtherTabs"><a href="javascript:;">关闭其它标签页</a></dd>
+                <dd layadmin-event="closeAllTabs"><a href="javascript:;">关闭全部标签页</a></dd>
               </dl>
             </li>
           </ul>
         </div>
         <div class="layui-tab" lay-unauto lay-allowClose="true" lay-filter="layadmin-layout-tabs">
           <ul class="layui-tab-title" id="LAY_app_tabsheader">
-            <li lay-id="home/console.html" class="layui-this">
-              <i class="layui-icon layui-icon-home"></i>
-            </li>
+            <li lay-id="home/console.html" class="layui-this"><i class="layui-icon layui-icon-home"></i></li>
           </ul>
         </div>
       </div>
-
-
+      
+      
       <!-- 主体内容 -->
       <div class="layui-body" id="LAY_app_body">
         <div class="layadmin-tabsbody-item layui-show">
           <iframe src="/home/" frameborder="0" class="layadmin-iframe"></iframe>
         </div>
       </div>
-
+      
       <!-- 辅助元素，一般用于移动设备下遮罩 -->
       <div class="layadmin-body-shade" layadmin-event="shade"></div>
     </div>
@@ -270,64 +237,36 @@
 
   <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
   <script>
-    var machineID,runTimeID;
-    layui.config({
-      base: "{% static 'layuiadmin/' %}" //静态资源所在路径
-    }).extend({
-      index: 'lib/index' //主入口模块
-    }).use(['index', 'layer'], function () { //独立版的layer无需执行这一句
-      var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
-      
-      //触发事件
-      var active = {
-        Wavelet: function () {
-          var that = this;
-          //多窗口模式，层叠置顶
-          layer.open({
-            type: 2,
-            title: '选择所要查找的工厂/部门/机器',
-            area: ['800px', '200px'],
-            fixed: false, //不固定
-            maxmin: true,
-            content: '/ChoiceFactory/',
-            btn: ['提交', '关闭'],
-            yes: function (index, layero) {
-              console.log(machineID);
-              layer.closeAll();
-            },
-            end: function () {
-              var iframe = $(window.parent.document).find(".layui-show > iframe");
-              url = '/GridWaveletsmooth/?machineID=' + machineID;
-              iframe.length == 1 ? $(iframe).attr("src",url) : window.parent.location.reload();
-            }
-          });
-        }
-      };
+  layui.config({
+    base: "{% static 'layuiadmin/' %}" //静态资源所在路径
+  }).extend({
+    index: 'lib/index' //主入口模块
+  }).use('index');
 
-      $('#Wavelet').on('click', function () {
-        var othis = $(this), method = othis.data('method');
-        active[method] ? active[method].call(this, othis) : '';
-      });
-    });
-  </script>
-
+  
+  </script> 
   <script>
-    //动态获取导航栏
+ 
     $.ajax({
-      type: 'POST',
-      url: '/api/getNav',
-      success: function (data) {
-        $("#mesHisData").empty();
-        $("#mesLiveData").empty();
-
-        for (var i = 0; i < data.data.length; i++) {
-          $("#mesHisData").append("<dd data-name='list'><a lay-href=sensorData?factorID=" + data.data[i].factorID + "> " + data.data[i].factorDes + "</a></dd>");
-          $("#mesLiveData").append("<dd data-name='list'><a lay-href=sensorData?factorID=" + data.data[i].factorID + "> " + data.data[i].factorDes + "</a></dd>");
+        type: 'POST',
+        url: '/api/getNav',
+        success:function(data) {
+            $("#mesHisData").empty();
+            $("#mesLiveData").empty();
+            //$("#mes").append("<option>请选择传感器</option>");
+             var time = 1;
+            for(var i = 0; i < data.data.length;i++){                
+                $("#mesHisData").append("<dd data-name='list'><a lay-href=sensorData?factorID=" + data.data[i].factorID + "> " + data.data[i].factorDes + "</a></dd>");    
+                $("#mesLiveData").append("<dd data-name='list'><a lay-href=sensorData?factorID=" + data.data[i].factorID + "> " + data.data[i].factorDes + "</a></dd>");                  
+            }
+           
         }
-
-      }
     })
-  </script>
-</body>
 
+  </script>
+
+
+</body>
 </html>
+
+
