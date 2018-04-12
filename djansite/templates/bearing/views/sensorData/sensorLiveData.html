@@ -191,7 +191,7 @@ layui.use('form', function(){
   })          
        
   form.on('select(MachineID)',function(MachineID){
-                      
+         
     $.ajax({
         type: 'POST',
         url: '/api/getSensor',
@@ -201,11 +201,9 @@ layui.use('form', function(){
         success:function(data) {
             $("#all-select-sensors").empty();
             $("#all-select-sensors").append("<option>请选择传感器</option>");
-             var time = 1;
-            for(var i = 0; i < data.data.length;i++){                
 
+            for(var i = 0; i < data.data.length;i++){                
                 $("#all-select-sensors").append("<option value=" + data.data[i].sensorID + "> " + data.data[i].dsensorDes + "</option>")           
-                time++;
             }
             form.render();    
         }
@@ -218,7 +216,7 @@ layui.use('form', function(){
         },
         success: function (data) {
           $("#all-select-Datetime").empty();
-
+        console.log(data.data.length);
           if (data.data.length == 0) {
             $("#all-select-Datetime").append("<option value=''> 机器从未运行过！</option>")
           }
@@ -245,7 +243,35 @@ layui.use('form', function(){
 
     $.getJSON(url, function (data) {
          $('#container').highcharts('StockChart', {
-
+            chart : {
+                events : {
+                    load : function () {
+                        // set up the updating of the chart each second
+                        var series = this.series[0];
+                        setInterval(function () {
+                            var x = (new Date()).getTime(), // current time
+                                y = Math.round(Math.random()*10);
+                            series.addPoint([x, y], true, true);
+                        }, 1000);
+                    }
+                }
+            },
+            rangeSelector: {
+                buttons: [{
+                    count: 1,
+                    type: 'minute',
+                    text: '1M'
+                }, {
+                    count: 5,
+                    type: 'minute',
+                    text: '5M'
+                }, {
+                    type: 'all',
+                    text: 'All'
+                }],
+                inputEnabled: false,
+                selected: 0
+            },
             title: {
                 text: sensorID.elem[sensorID.elem.selectedIndex].text
             },
@@ -255,30 +281,23 @@ layui.use('form', function(){
             xAxis: {
                 gapGridLineWidth: 0
             },
-            rangeSelector : {
-                buttons : [{
-                    type : 'hour',
-                    count : 1,
-                    text : '1h'
-                }, {
-                    type : 'day',
-                    count : 1,
-                    text : '1D'
-                }, {
-                    type : 'all',
-                    count : 1,
-                    text : 'All'
-                }],
-                selected : 1,
-                inputEnabled : false
-            },
             tooltip: {
                 split: false
             },
             series : [{
                 name : sensorID.elem[sensorID.elem.selectedIndex].text,
                 type: 'area',
-                data : data,
+                data : (function () {
+                // generate an array of random data
+                var data = [], time = (new Date()).getTime(), i;
+                for (i = -999; i <= 0; i += 1) {
+                    data.push([
+                        time + i * 1000,
+                        Math.round(Math.random()*10)
+                    ]);
+                }
+                return data;
+            }()),
                 gapSize: 5,
                 tooltip: {
                     valueDecimals: 3,
@@ -319,22 +338,19 @@ $('#container').highcharts('StockChart', {
     },
     rangeSelector: {
         buttons: [{
-            type: 'hour',
             count: 1,
-            text: '1h'
-        },
-        {
-            type: 'day',
-            count: 1,
-            text: '1D'
-        },
-        {
+            type: 'minute',
+            text: '1M'
+        }, {
+            count: 5,
+            type: 'minute',
+            text: '5M'
+        }, {
             type: 'all',
-            count: 1,
             text: 'All'
         }],
-        selected: 1,
-        inputEnabled: false
+        inputEnabled: false,
+        selected: 0
     },
     tooltip: {
         split: false

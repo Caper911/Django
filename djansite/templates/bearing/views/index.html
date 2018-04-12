@@ -37,7 +37,7 @@
         <ul class="layui-nav layui-layout-right" lay-filter="layadmin-layout-right">
 
           <li class="layui-nav-item" lay-unselect>
-            <a lay-href="app/message/index.html" layadmin-event="message" lay-text="消息中心">
+            <a lay-href="/appMessage/" layadmin-event="message" lay-text="消息中心">
               <i class="layui-icon layui-icon-notice"></i>
 
               <!-- 如果有新消息，则显示小圆点 -->
@@ -322,7 +322,7 @@
 
         for (var i = 0; i < data.data.length; i++) {
           $("#mesHisData").append("<dd data-name='list'><a lay-href=sensorData?factorID=" + data.data[i].factorID + "> " + data.data[i].factorDes + "</a></dd>");
-          $("#mesLiveData").append("<dd data-name='list'><a lay-href=sensorData?factorID=" + data.data[i].factorID + "> " + data.data[i].factorDes + "</a></dd>");
+          $("#mesLiveData").append("<dd data-name='list'><a lay-href=sensorLiveData?factorID=" + data.data[i].factorID + "> " + data.data[i].factorDes + "</a></dd>");
         }
 
       }

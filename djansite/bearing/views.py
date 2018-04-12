@@ -47,6 +47,9 @@ def register(request):
 def componentGridAll(request):
     return render(request,'bearing/views/component/grid/all.html')
 
+def appMessage(request):
+    return render(request,'bearing/views/app/message/index.html')
+
 def ChoiceFactory(request):
     return render(request,'bearing/views/iframe/choiceFactory.html')
 
@@ -454,7 +457,7 @@ def getPhoneSendVercode(request):
         cache.set(phone, vercode, 300)
         #test
         print(vercode)
-        #SendSMS(phone,vercode)
+        SendSMS(phone,vercode)
     else:
         arr['code'] = 1
         
@@ -466,6 +469,8 @@ def getPhoneSendVercode(request):
 def sensorDataView(request):
     return render(request,'bearing/views/sensorData/sensorDataView.html')
 
+def sensorLiveData(request):
+    return render(request,'bearing/views/sensorData/sensorLiveData.html')
 
 
 #返回测试数据，用于增加图表的数据点
