@@ -81,7 +81,7 @@ class sensorInfo(models.Model):
     sensorID = models.AutoField(primary_key=True)
     sensorCode = models.CharField('传感器编码',max_length=15,null=True,blank=True)
     dsensorDes = models.CharField('传感器描述',max_length=50,null=True,blank=True)
-    machine = models.ForeignKey(machine,null=True)
+    machine = models.ForeignKey(machine,null=True,on_delete=models.CASCADE)
     saveDate = models.DateTimeField('保存日期',default = timezone.now)
     modDate = models.DateTimeField('最后修改日期', auto_now = True)
     def __str__(self):
