@@ -98,7 +98,7 @@ class sensorRawData(models.Model):
     sensorID = models.AutoField(primary_key=True)
     sesorValue = models.FloatField('数值')
     saveDate = models.DateTimeField('保存日期',default = timezone.now)
-    sensorInfo = models.ForeignKey(sensorInfo)
+    sensorInfo = models.ForeignKey(sensorInfo,on_delete=models.CASCADE)
     opStartEnddate = models.ForeignKey(opStartEnddate,on_delete=models.CASCADE,)
     def __str__(self):
         return str(self.opStartEnddate.opCodeID)+'.'+self.sensorInfo.dsensorDes +':'+ str(self.sesorValue)
