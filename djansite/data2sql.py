@@ -166,7 +166,26 @@ def insertData():
                 sensor = sensorInfo.objects.get(sensorID=arr[i]['sensorID'])
                 opStartEnd = opStartEnddate.objects.get(opCodeID='1')
                 Data = sensorRawData.objects.create(sesorValue=row[i],sensorInfo = sensor,opStartEnddate=opStartEnd)
-    Data.save()    
+    Data.save() 
+
+def Data():
+    
+    csv_reader = csv.reader(open('DATA/original_data_3000.csv', encoding='utf-8'))
+    
+    machin = machine.objects.get(machineID = '2')
+            
+    AllSensor =  sensorInfo.objects.filter(machine=machin).values("sensorID","sensorCode").distinct()
+
+    arr=list(AllSensor)
+
+    for row in csv_reader:
+
+        for i in range(len(arr)):    
+            sensor = sensorInfo.objects.get(sensorID=arr[i]['sensorID'])
+            opStartEnd = opStartEnddate.objects.get(opCodeID='1')
+            Data = sensorRawData.objects.create(sesorValue=row[i],sensorInfo = sensor,opStartEnddate=opStartEnd)
+    Data.save()  
+   
     
 if __name__ == "__main__":
     #initInfo()
@@ -174,7 +193,8 @@ if __name__ == "__main__":
     #test()
     #getRawData('1','1')
     #strrr = getIO()
-    insertData()
+    #insertData()
+    Data()
     print('Done!')
 
 
