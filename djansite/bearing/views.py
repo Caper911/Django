@@ -352,7 +352,7 @@ class Captcha:
 
     # 生成图像
     def _generate_image(self):
-        image = Image.new('RGBA', (self._width, self._height), self._bgcolor)  # 画布
+        image = Image.new('RGB', (self._width, self._height), self._bgcolor)  # 画布
         font = ImageFont.truetype(self._font_path, 24)  # 用到的字体
         draw = ImageDraw.Draw(image)  # 画笔
         text = self.captcha_code
