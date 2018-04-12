@@ -120,18 +120,18 @@ class sensorWaveletData(models.Model):
 class cpuInfo(models.Model):
     value = models.FloatField()
     time = models.DateTimeField()
-    machine = models.ForeignKey(machine,null=True)
+    #machine = models.ForeignKey(machine,null=True,on_delete=models.CASCADE)
     
 class memoryInfo(models.Model):
     valueUsed = models.FloatField()
     memPercent = models.FloatField()
     time = models.DateTimeField()
-    machine = models.ForeignKey(machine,null=True)
+    #machine = models.ForeignKey(machine,null=True,on_delete=models.CASCADE)
 
 class ioInfo(models.Model):
     value = models.FloatField()
     time = models.DateTimeField()
-    machine = models.ForeignKey(machine,null=True)
+    #machine = models.ForeignKey(machine,null=True,on_delete=models.CASCADE)
         
 
 class Profile(models.Model):
