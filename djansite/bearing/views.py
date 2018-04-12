@@ -464,7 +464,7 @@ def getPhoneSendVercode(request):
 
 
 def sensorDataView(request):
-    return render(request,'bearing/sensorDataView.html')
+    return render(request,'bearing/views/sensorData/sensorDataView.html')
 
 
 

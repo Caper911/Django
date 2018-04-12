@@ -54,7 +54,7 @@ urlpatterns = [
     url(r'^api/getMachine$',views.getMachine),
     url(r'^getOpcodeByMachineID$',views.getOpcodeByMachineID),
     url(r'^api/getNav$',views.getNav),
-    url(r'^api/getDepatr$',views.getDepart),
+    url(r'^api/getDepart$',views.getDepart),
     url(r'^api/getMachineRunTime$',views.getMachineRunTime),
     url(r'^user/captcha/$',views.captcha),
     url(r'^apiTokenAuth/$', VIEW.obtain_auth_token),

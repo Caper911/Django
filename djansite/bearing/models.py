@@ -4,7 +4,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.conf import settings
 import django.utils.timezone as timezone
-import time
 from rest_framework.authtoken.models import Token
 
 # Create your models here.
@@ -36,7 +35,7 @@ class productDepart(models.Model):
     otherInfo = models.TextField(null=True,blank=True)
     saveDate = models.DateTimeField('保存日期',default = timezone.now)
     modDate = models.DateTimeField('最后修改日期', auto_now = True)
-    factory = models.ForeignKey(factory)
+    factory = models.ForeignKey(factory,on_delete=models.CASCADE,)
     
     def __str__(self):
         return self.factory.factorDes + self.depatrDes
@@ -60,7 +59,7 @@ class machine(models.Model):
     saveDate = models.DateTimeField('保存日期',default = timezone.now)
     modDate = models.DateTimeField('最后修改日期', auto_now = True)
     otherInfo = models.TextField('备注 ',null=True,blank=True)
-    productDepart = models.ForeignKey(productDepart)
+    productDepart = models.ForeignKey(productDepart,on_delete=models.CASCADE,)
 
     def __str__(self):
         return self.productDepart.depatrDes + self.machineDes
@@ -69,8 +68,8 @@ class machineRunTime(models.Model):
     class Meta:
         verbose_name = '铣床运行时间段'
         verbose_name_plural = '铣床运行时间段' 
-    machine = models.ForeignKey(machine)
-    opStartEnddate = models.ForeignKey(opStartEnddate)
+    machine = models.ForeignKey(machine,on_delete=models.CASCADE,)
+    opStartEnddate = models.ForeignKey(opStartEnddate,on_delete=models.CASCADE,)
     def __str__(self):
         return self.machine.machineDes +' - '+ str(self.opStartEnddate.opCodeID)
     
@@ -100,7 +99,7 @@ class sensorRawData(models.Model):
     sesorValue = models.FloatField('数值')
     saveDate = models.DateTimeField('保存日期',default = timezone.now)
     sensorInfo = models.ForeignKey(sensorInfo)
-    opStartEnddate = models.ForeignKey(opStartEnddate)
+    opStartEnddate = models.ForeignKey(opStartEnddate,on_delete=models.CASCADE,)
     def __str__(self):
         return str(self.opStartEnddate.opCodeID)+'.'+self.sensorInfo.dsensorDes +':'+ str(self.sesorValue)
 #从sensorRawData表中读取源数据处理后生成小波数据，并存入sensorWaveletData中
@@ -113,8 +112,8 @@ class sensorWaveletData(models.Model):
     sensorID = models.AutoField(primary_key=True)
     sesorValue = models.FloatField('数值')
     saveDate = models.DateTimeField('保存日期',default = timezone.now)
-    sensorInfo = models.ForeignKey(sensorInfo)
-    opStartEnddate = models.ForeignKey(opStartEnddate)   
+    sensorInfo = models.ForeignKey(sensorInfo,on_delete=models.CASCADE,)
+    opStartEnddate = models.ForeignKey(opStartEnddate,on_delete=models.CASCADE,)   
     
 
 

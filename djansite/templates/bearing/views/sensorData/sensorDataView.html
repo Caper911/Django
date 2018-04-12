@@ -59,10 +59,10 @@
                   </div>
                 
                   <div class="layui-input-inline">
-                    <select name="sensor" lay-verify="required" lay-filter="sensor">
-                      <option value="">操作时间</option>
+                    <select name="sensor" id="all-select-Datetime" lay-verify="required" lay-filter="sensor">
+                      <option value="">选择操作时间</option>
 
-                    
+                    </select>
                   </div>
                   
                 </div>
@@ -81,7 +81,7 @@
 
   <script>
   layui.config({
-    base: "{% static '' %}" //静态资源所在路径
+    base: "{% static 'layuiadmin/' %}" //静态资源所在路径
   }).extend({
     index: 'lib/index' //主入口模块
   }).use(['index']);
@@ -118,9 +118,9 @@ function loadDepartselect(form){
                          
         $.ajax({
             type: 'POST',
-            url: '/api/getDepatr',
+            url: '/api/getDepart',
             data: {
-                factorID: ID
+                factoryID: ID
             },
             success:function(data) {
             	$("#all-select-Depart").empty();
@@ -163,19 +163,15 @@ Highcharts.setOptions({
 //设置Highcharts的时区
 Highcharts.setOptions({ global: { useUTC: false } }); 
 
-
-
 layui.use('form', function(){
   var form = layui.form;
   loadDepartselect(form); 
-  
-  var opCode;
 
   form.on('select(departID)',function(DepartID){
                          
     $.ajax({
         type: 'POST',
-        url: '/getMachine',
+        url: '/api/getMachine',
         data: {
             departID: DepartID.value
         },
@@ -199,12 +195,10 @@ layui.use('form', function(){
   })          
        
   form.on('select(MachineID)',function(MachineID){
-    var urll = getQueryString()
-    //var loca = urll["location"];
-                           
+                      
     $.ajax({
         type: 'POST',
-        url: '/getSensor',
+        url: '/api/getSensor',
         data: {
             machineID: MachineID.value
         },
@@ -217,10 +211,33 @@ layui.use('form', function(){
                 $("#all-select-sensors").append("<option value=" + data.data[i].sensorCode + "> " + data.data[i].dsensorDes + "</option>")           
                 time++;
             }
-            form.render();   
+            form.render();    
         }
     })
-   })                   
+    $.ajax({
+        type: 'POST',
+        url: '/api/getMachineRunTime',
+        data: {
+          machineID: MachineID.value
+        },
+        success: function (data) {
+          $("#all-select-Datetime").empty();
+
+          if (data.data.length == 0) {
+            $("#all-select-Datetime").append("<option value=''> 机器从未运行过！</option>")
+          }
+          else {
+            $("#all-select-Datetime").append("<option>请选择时间段!</option>");
+            for (var i = 0; i < data.data.length; i++) {
+              $("#all-select-Datetime").append("<option value=" + data.data[i].opCodeID + "> " + data.data[i].opCodeDes + "</option>")
+            }
+
+            form.render(); }
+        }
+   })
+   form.render();    
+  })
+
         
   //监听传感器选择下拉框，改变则重新获取数据
   form.on('select(sensor)', function(sensorName){
@@ -292,8 +309,6 @@ layui.use('form', function(){
     
   });
 });
-
-
 </script>
 
 <script>
