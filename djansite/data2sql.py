@@ -203,7 +203,10 @@ class rspi:
         cpuPercent = psutil.cpu_percent(None)
         cpuEachPercent = psutil.cpu_percent(percpu = True)
         # current -> [1] highest -> [2]
-        cpuTemperature = psutil.sensors_temperatures()['coretemp'][0]
+        if len(psutil.sensors_temperatures()) ==0:
+            cpuTemperature =99
+        else:
+            cpuTemperature = psutil.sensors_temperatures()['coretemp'][0]
         
         return {'cpuNum':cpuNum,'cpuPercent':cpuPercent,
                 'cpuEachPercent':cpuEachPercent,'cpuTemperature':cpuTemperature}
@@ -262,14 +265,24 @@ class rspi:
 webSocketUrl = "http://127.0.0.1:8000/socket/TestSocket"
 import json
 def sentRspiData(webSocketUrl):
-    ws = websocket.create_connection(webSocketUrl)
-    
+   
+    reconnect = True
+
     while True:
-        rspiInfo = rspi()
-        info= {'user':rspiInfo.USER,'IP':rspiInfo.IP,'cpuInfo':rspiInfo.CpuInfo(),
+        try:
+            if reconnect:
+                ws = websocket.create_connection(webSocketUrl)
+            
+            rspiInfo = rspi()
+            info= {'user':rspiInfo.USER,'IP':rspiInfo.IP,'cpuInfo':rspiInfo.CpuInfo(),
                  'MemoryInfo':rspiInfo.MemoryInfo(),'IOInfo':rspiInfo.IOInfo(), 'HardDiskInfo':rspiInfo.HardDiskInfo() }
-        ws.send(json.dumps(info))
-        
+       
+            ws.send(json.dumps(info))
+            reconnect = False
+        except:
+            print("connect error!")
+            reconnect = True
+            
     ws.close()
     
 def count():
