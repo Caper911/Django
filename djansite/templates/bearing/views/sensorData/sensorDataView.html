@@ -245,7 +245,6 @@ layui.use('form', function(){
 
     $.getJSON(url, function (data) {
          $('#container').highcharts('StockChart', {
-
             title: {
                 text: sensorID.elem[sensorID.elem.selectedIndex].text
             },
@@ -300,7 +299,10 @@ layui.use('form', function(){
                 threshold: null
             }]
         });
-    });
+        data = 0;
+    }
+    
+    );
     
   });
 });

@@ -10,12 +10,13 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-import json
 import sys
 import datetime
 import time
 import random
 from django.db.models import Q
+from dwebsocket.decorators import accept_websocket, require_websocket
+
 
 
 # Create your views here.
@@ -58,6 +59,9 @@ def GridWaveletsmooth(request):
 
 def Map(request):
     return render(request,'bearing/views/map/map.html')
+
+def raspiDashboard(request):
+    return render(request,'bearing/views/raspi/dashboard.html')
 
 def testapi(request):
     data = {"code":0,"msg":"","count":1000,"data":[{"id":10000,"username":"user-0","sex":"女","city":"城市-0","sign":"签名-0","experience":255,"logins":24,"wealth":82830700,"classify":"作家","score":57},{"id":10001,"username":"user-1","sex":"男","city":"城市-1","sign":"签名-1","experience":884,"logins":58,"wealth":64928690,"classify":"词人","score":27},{"id":10002,"username":"user-2","sex":"女","city":"城市-2","sign":"签名-2","experience":650,"logins":77,"wealth":6298078,"classify":"酱油","score":31},{"id":10003,"username":"user-3","sex":"女","city":"城市-3","sign":"签名-3","experience":362,"logins":157,"wealth":37117017,"classify":"诗人","score":68},{"id":10004,"username":"user-4","sex":"男","city":"城市-4","sign":"签名-4","experience":807,"logins":51,"wealth":76263262,"classify":"作家","score":6},{"id":10005,"username":"user-5","sex":"女","city":"城市-5","sign":"签名-5","experience":173,"logins":68,"wealth":60344147,"classify":"作家","score":87},{"id":10006,"username":"user-6","sex":"女","city":"城市-6","sign":"签名-6","experience":982,"logins":37,"wealth":57768166,"classify":"作家","score":34},{"id":10007,"username":"user-7","sex":"男","city":"城市-7","sign":"签名-7","experience":727,"logins":150,"wealth":82030578,"classify":"作家","score":28},{"id":10008,"username":"user-8","sex":"男","city":"城市-8","sign":"签名-8","experience":951,"logins":133,"wealth":16503371,"classify":"词人","score":14},{"id":10009,"username":"user-9","sex":"女","city":"城市-9","sign":"签名-9","experience":484,"logins":25,"wealth":86801934,"classify":"词人","score":75}]}
@@ -811,7 +815,6 @@ def dealWaveletData(request):
 ################################################################
 #文件导出函数:将去燥后的数据导出至csv文件
 import csv
-from django.http import HttpResponse
  
 # Number of unruly passengers each year 1995 - 2005. In a real application
 # this would likely come from a database or some other back-end data store.
@@ -831,10 +834,32 @@ def getWaveletDataToCsv(request):
   return response
 
 
-    
-    
+##################################################################
+#
+import json
+from django.core.cache import cache
+@require_websocket
+def TestSocket(request):
+    while True:
+        message = request.websocket.wait()   
         
+        Info = json.loads(message)
         
+        for key,value in Info.items():
+            cache.set(key, json.dumps(value))
+
+@require_websocket
+def sentTestSocket(request):
+    #message = request.websocket.wait()
+    key = ['user','IP','cpuInfo','MemoryInfo','IOInfo','HardDiskInfo']
+    data = {}
+    while True:
+        for i in range(len(key)):    
+            data[key[i]]=json.loads(cache.get(key[i]))
+        
+        message = str(json.dumps(data)).encode(encoding="utf-8")
+        request.websocket.send(message)
+        time.sleep(1)
     
     
     
