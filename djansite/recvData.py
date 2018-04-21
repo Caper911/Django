@@ -42,7 +42,7 @@ def try_read_data(channel=0):
             arr = receive_payload.decode('utf-8').split(',')
             print('湿度:' + str(arr[0]) +'%')
             print('温度:' + str(arr[1]) +'℃')
-            print('可燃气体浓度:' + str(arr[2]) )
+            print('可燃气体浓度:' + str(arr[2]) +'\n')
             # First, stop listening so we can talk
             radio.stopListening()
 
@@ -58,7 +58,7 @@ min_payload_size = 4
 max_payload_size = 32
 payload_size_increments_by = 1
 next_payload_size = min_payload_size
-inp_role = '1'
+inp_role = '0'
 send_payload = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ789012'
 millis = lambda: int(round(time.time() * 1000))
 
