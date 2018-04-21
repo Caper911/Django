@@ -4,6 +4,8 @@
 
 from __future__ import print_function
 import time
+import json
+import websocket
 from RF24 import *
 import RPi.GPIO as GPIO
 
@@ -37,6 +39,7 @@ def try_read_data(channel=0):
         while radio.available():
             len = radio.getDynamicPayloadSize()
             receive_payload = radio.read(len)
+            
             print('时间：'+ time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
             print('接受到数据的长度={} 源数据="{}"'.format(len, receive_payload.decode('utf-8')))
             arr = receive_payload.decode('utf-8').split(',')
@@ -45,7 +48,11 @@ def try_read_data(channel=0):
             print('可燃气体浓度:' + str(arr[2]) +'\n')
             # First, stop listening so we can talk
             radio.stopListening()
+                
 
+            info= {'humidity':arr[0],'temperature':arr[1],'concentration':arr[2] }
+       
+            ws.send(json.dumps(info))
             # Send the final one back.
             radio.write(receive_payload)
             #print('Sent response.')
@@ -61,7 +68,8 @@ next_payload_size = min_payload_size
 inp_role = '0'
 send_payload = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ789012'
 millis = lambda: int(round(time.time() * 1000))
-
+webSocketUrl = "ws://192.168.123.134:8000/socket/sentTemHumSmogSocket"
+ws = websocket.create_connection(webSocketUrl)
 print('上位机接收数据程序')
 radio.begin()
 radio.enableDynamicPayloads()
