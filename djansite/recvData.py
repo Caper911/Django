@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 
-#
-# Example using Dynamic Payloads
-# 
-#  This is an example of how to use payloads of a varying (dynamic) size.
-# 
+
 
 from __future__ import print_function
 import time
@@ -21,9 +17,7 @@ irq_gpio_pin = None
 # Setup for GPIO 22 CE and CE0 CSN with SPI Speed @ 8Mhz
 #radio = RF24(RPI_V2_GPIO_P1_15, BCM2835_SPI_CS0, BCM2835_SPI_SPEED_8MHZ)
 
-#RPi B
-# Setup for GPIO 15 CE and CE1 CSN with SPI Speed @ 8Mhz
-#radio = RF24(RPI_V2_GPIO_P1_15, BCM2835_SPI_CS0, BCM2835_SPI_SPEED_8MHZ)
+
 
 #RPi B+
 # Setup for GPIO 22 CE and CE0 CSN for RPi B+ with SPI Speed @ 8Mhz
@@ -43,14 +37,18 @@ def try_read_data(channel=0):
         while radio.available():
             len = radio.getDynamicPayloadSize()
             receive_payload = radio.read(len)
-            print(time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
-            print('Got payload size={} value="{}"'.format(len, receive_payload.decode('utf-8')))
+            print('时间：'+ time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
+            print('接受到数据的长度={} 源数据="{}"'.format(len, receive_payload.decode('utf-8')))
+            arr = receive_payload.decode('utf-8').split(',')
+            print('湿度:' + str(arr[0]) +'%')
+            print('温度:' + str(arr[1]) +'℃')
+            print('可燃气体浓度:' + str(arr[2]) )
             # First, stop listening so we can talk
             radio.stopListening()
 
             # Send the final one back.
             radio.write(receive_payload)
-            print('Sent response.')
+            #print('Sent response.')
 
             # Now, resume listening so we catch the next packets.
             radio.startListening()
@@ -60,11 +58,11 @@ min_payload_size = 4
 max_payload_size = 32
 payload_size_increments_by = 1
 next_payload_size = min_payload_size
-inp_role = 'none'
+inp_role = '1'
 send_payload = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ789012'
 millis = lambda: int(round(time.time() * 1000))
 
-print('pyRF24/examples/pingpair_dyn/')
+print('上位机接收数据程序')
 radio.begin()
 radio.enableDynamicPayloads()
 radio.setRetries(15,15)
@@ -72,8 +70,9 @@ radio.printDetails()
 
 print(' ************ Role Setup *********** ')
 while (inp_role !='0') and (inp_role !='1'):
-    inp_role = str(input('Choose a role: Enter 0 for receiver, 1 for transmitter (CTRL+C to exit) '))
+    inp_role = str(input('等待数据的到达( CTRL+C 退出) '))
 
+#初始化程序
 if inp_role == '0':
     print('Role: Pong Back, awaiting transmission')
     if irq_gpio_pin is not None:
