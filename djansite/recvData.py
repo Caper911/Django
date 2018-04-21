@@ -50,9 +50,10 @@ def try_read_data(channel=0):
             radio.stopListening()
                 
 
-            info= {'humidity':arr[0],'temperature':arr[1],'concentration':arr[2] }
+            info= {'id':'rs01','humidity':arr[0],'temperature':arr[1],'concentration':arr[2] }
        
             ws.send(json.dumps(info))
+            
             # Send the final one back.
             radio.write(receive_payload)
             #print('Sent response.')
