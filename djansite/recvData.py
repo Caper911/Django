@@ -54,7 +54,8 @@ def try_read_data(channel=0):
        
             
             loop = True
-
+            reconnect = True
+            
             while loop:
                 try:
                     if reconnect:
