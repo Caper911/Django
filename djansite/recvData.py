@@ -52,6 +52,23 @@ def try_read_data(channel=0):
 
             info= {'id':'rs01','humidity':arr[0],'temperature':arr[1],'concentration':arr[2] }
        
+            
+            loop = True
+
+            while loop:
+                try:
+                    if reconnect:
+                        ws = websocket.create_connection(webSocketUrl)
+            
+                    ws.send(json.dumps(info))
+                    reconnect = False
+                    loop = False
+                except:
+                    print("connect error!")
+                    reconnect = True
+                    loop = True
+
+
             ws.send(json.dumps(info))
             
             # Send the final one back.
@@ -70,7 +87,9 @@ inp_role = '0'
 send_payload = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ789012'
 millis = lambda: int(round(time.time() * 1000))
 webSocketUrl = "ws://192.168.123.134:8000/socket/sentTemHumSmogSocket"
-ws = websocket.create_connection(webSocketUrl)
+
+reconnect = True
+
 print('上位机接收数据程序')
 radio.begin()
 radio.enableDynamicPayloads()
