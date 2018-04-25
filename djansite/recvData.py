@@ -61,15 +61,16 @@ def try_read_data(channel=0):
                         ws = websocket.create_connection(webSocketUrl)
             
                     ws.send(json.dumps(info))
-                    reconnect = False
-                    loop = False
+
                 except:
                     print("connect error!")
+                    time.sleep(1)
                     reconnect = True
                     loop = True
-
-
-            ws.send(json.dumps(info))
+                else:
+                    reconnect = False
+                    loop = False
+    
             
             # Send the final one back.
             radio.write(receive_payload)
