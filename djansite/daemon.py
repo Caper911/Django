@@ -12,7 +12,6 @@ import os
 import sys
 import atexit
 import signal
-import requests
 
 
 class Daemon:
@@ -84,7 +83,8 @@ class Daemon:
         try:
             if os.path.exists(self.pidfile):
                 with open(self.pidfile) as f:
-                    os.kill(int(f.read()), signal.SIGTERM)
+                    os.kill(int(f.read()), signal.SIGKILL)
+                os.remove(self.pidfile)
             else:
                 print('Not running.', file=sys.stderr)
                 raise SystemExit(1)
