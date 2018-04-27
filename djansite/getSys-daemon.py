@@ -80,11 +80,11 @@ class rspi:
         return {'virtual_memory':virtual_memory,'swap_memory':swap_memory}
         
     def IOInfo(self):
-        net_io_counters = psutil.net_io_counters()
+        net_io_counters = psutil.net_io_counters(pernic=True)['wlp8s0']
         sent = net_io_counters[0]
         recv = net_io_counters[1]
         time.sleep(1)
-        net_io_counters = psutil.net_io_counters()
+        net_io_counters = psutil.net_io_counters(pernic=True)['wlp8s0']
         sent_1s = net_io_counters[0]
         recv_1s = net_io_counters[1]
         
