@@ -16,33 +16,8 @@ import time
 from daemon import Daemon
 
 
-# 发送数据
-def sentRspiData(webSocketUrl,info):
-    reconnect = True
-
-    while True:
-        try:
-            if reconnect:
-                ws = websocket.create_connection(webSocketUrl)
-                print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())+':'+"Server Connect Success!")
-            
-            rspiInfo = rspi()
-            info= {'datetime':time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'id':'rs01','user':rspiInfo.USER,'IP':rspiInfo.IP,'OsVer':rspiInfo.getOsVersion(),'cpuInfo':rspiInfo.CpuInfo(),
-                 'MemoryInfo':rspiInfo.MemoryInfo(),'IOInfo':rspiInfo.IOInfo(), 'HardDiskInfo':rspiInfo.HardDiskInfo() }
-
-            ws.send(json.dumps(info))
-            info['datetime'] =''
-            reconnect = False
-        except:
-            print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()) +':'+"Server Connect Error!")
-            time.sleep(1)
-            reconnect = True
-            
-    ws.close()
-            
-
 ##########################################
-def try_read_data(channel=0):
+def try_read_data(radio,webSocketUrl,channel=0):
     # 判断信道是否可用
     if radio.available():
         reconnect = True
@@ -74,7 +49,6 @@ def try_read_data(channel=0):
 
             except:
                 print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()) +':'+"Server Connect Error!")
-                time.sleep(1)
                 reconnect = True
             # 
             else:
@@ -87,7 +61,7 @@ def try_read_data(channel=0):
             radio.startListening()
 
 ##########################################
-def InitRadio(inp_role):
+def InitRadio(radio,pipes,inp_role,irq_gpio_pin):
     #初始化程序
     if inp_role == '0':
         print('角色: 接收端, 等待数据传输...')
@@ -110,12 +84,12 @@ def InitRadio(inp_role):
         radio.openReadingPipe(1,pipes[1])
     
 ##########################################
-def SendOrRecData(inp_role):
+def SendOrRecData(radio,inp_role,irq_gpio_pin,webSocketUrl):
     while 1:
         if inp_role == '1':   # 角色:发送端
             radio.stopListening()
             print('正在发送... 长度为 {} ... '.format(len(send_payload)), end="")
-            radio.write(send_payload[])
+            radio.write(send_payload)
 
             # 发送完毕后，监听接收端的响应
             radio.startListening()
@@ -138,7 +112,7 @@ def SendOrRecData(inp_role):
             time.sleep(1)
         else:
             if irq_gpio_pin is None:
-                try_read_data()
+                try_read_data(radio,webSocketUrl)
                 time.sleep(1)
             else:
                 time.sleep(1000)
@@ -154,7 +128,7 @@ def loopSend():
     send_payload = b'TEST'
 
     irq_gpio_pin = None
-    
+
     # 设置角色 为接收端
     # 0为发送端 1为接收端
     inp_role = '0'
@@ -176,8 +150,8 @@ def loopSend():
     while (inp_role !='0') and (inp_role !='1'):
         inp_role = str(input('等待数据的到达( CTRL+C 退出) '))
 
-    InitRadio(inp_role)
-    SendOrRecData(inp_role)
+    InitRadio(radio,pipes,inp_role,irq_gpio_pin)
+    SendOrRecData(radio,inp_role,irq_gpio_pin,webSocketUrl)
     
 
 
