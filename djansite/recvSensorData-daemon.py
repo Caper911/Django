@@ -59,6 +59,30 @@ def try_read_data(radio,webSocketUrl,channel=0):
             
             # 继续监听数据的到来
             radio.startListening()
+        ws.close()
+
+
+##########################################
+def try_read_dataa(radio,channel=0):
+    # 判断信道是否可用
+    if radio.available():
+        
+        while radio.available():
+            len = radio.getDynamicPayloadSize()
+            receive_payload = radio.read(len)
+            arr = receive_payload.decode('utf-8').split(',')
+            # 停止监听
+            radio.stopListening()
+            
+            info= {'id':'rs01','humidity':arr[0],'temperature':arr[1],'concentration':arr[2] }
+            
+            # 向发送端发送响应
+            radio.write(receive_payload)
+            
+            # 继续监听数据的到来
+            radio.startListening()
+    
+    return info
 
 ##########################################
 def InitRadio(radio,pipes,inp_role,irq_gpio_pin):
@@ -85,6 +109,11 @@ def InitRadio(radio,pipes,inp_role,irq_gpio_pin):
     
 ##########################################
 def SendOrRecData(radio,inp_role,irq_gpio_pin,webSocketUrl):
+    millis = lambda: int(round(time.time() * 1000))
+
+    # 发送测试数据
+    send_payload = b'TEST'
+
     while 1:
         if inp_role == '1':   # 角色:发送端
             radio.stopListening()
@@ -112,11 +141,25 @@ def SendOrRecData(radio,inp_role,irq_gpio_pin,webSocketUrl):
             time.sleep(1)
         else:
             if irq_gpio_pin is None:
-                try_read_data(radio,webSocketUrl)
+                info = try_read_dataa(radio)
+                try:
+                    if reconnect:
+                        ws = websocket.create_connection(webSocketUrl)
+                        print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())+':'+"Server Connect Success!")
+        
+                    ws.send(json.dumps(info))
+
+                except:
+                    print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()) +':'+"Server Connect Error!")
+                    reconnect = True
+                # 
+                else:
+                    reconnect = False
+
+                #等待一秒
                 time.sleep(1)
             else:
                 time.sleep(1000)
-
 
 def loopSend():
 
@@ -124,8 +167,6 @@ def loopSend():
     # 信道
     pipes = [0xE8E8F0F0E1, 0xE8E8F0F0E1]
 
-    # 发送测试数据
-    send_payload = b'TEST'
 
     irq_gpio_pin = None
 
@@ -133,7 +174,7 @@ def loopSend():
     # 0为发送端 1为接收端
     inp_role = '0'
 
-    millis = lambda: int(round(time.time() * 1000))
+    
 
     # 服务器地址
     webSocketUrl = "ws://192.168.123.134:8000/socket/recTemHumSmogSocket"
