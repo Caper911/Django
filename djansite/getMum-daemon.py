@@ -9,7 +9,7 @@ import json
 import websocket
 
 
-webSocketUrl = "ws://192.168.123.134:8000/socket/TestSocket"
+webSocketUrl = "ws://192.168.123.134:8000/socket/recRaspInfoSocket"
 
 def sentRspiData(webSocketUrl):
     reconnect = True
@@ -20,20 +20,31 @@ def sentRspiData(webSocketUrl):
                 ws = websocket.create_connection(webSocketUrl)
             
             rspiInfo = rspi()
-            info= {'user':rspiInfo.USER,'IP':rspiInfo.IP,'cpuInfo':rspiInfo.CpuInfo(),
+            info= {'datetime':time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'id':'rs01','user':rspiInfo.USER,'IP':rspiInfo.IP,'OsVer':rspiInfo.getOsVersion(),'cpuInfo':rspiInfo.CpuInfo(),
                  'MemoryInfo':rspiInfo.MemoryInfo(),'IOInfo':rspiInfo.IOInfo(), 'HardDiskInfo':rspiInfo.HardDiskInfo() }
-       
+
             ws.send(json.dumps(info))
+            print(ws)
+            info['datetime'] =''
             reconnect = False
         except:
             print("connect error!")
             reconnect = True
+            
+    ws.close()
             
     
 class rspi:
     USER = getpass.getuser()
     IP = psutil.net_if_addrs()['wlp8s0'][0][1]
     
+    def getOsVersion(self):
+        with open('/etc/issue') as fd:
+            for line in fd:
+                osver = line.strip()
+                break
+        return osver[:-6]
+
     def CpuInfo(self):
         cpuNum = psutil.cpu_count()
         cpuPercent = psutil.cpu_percent(None)
@@ -70,11 +81,11 @@ class rspi:
         return {'virtual_memory':virtual_memory,'swap_memory':swap_memory}
         
     def IOInfo(self):
-        net_io_counters = psutil.net_io_counters()
+        net_io_counters = psutil.net_io_counters(pernic=True)['wlp8s0']
         sent = net_io_counters[0]
-        recv = net_io_counters[1]
+        recv = net_io_counters[1] 
         time.sleep(1)
-        net_io_counters = psutil.net_io_counters()
+        net_io_counters = psutil.net_io_counters(pernic=True)['wlp8s0']
         sent_1s = net_io_counters[0]
         recv_1s = net_io_counters[1]
         

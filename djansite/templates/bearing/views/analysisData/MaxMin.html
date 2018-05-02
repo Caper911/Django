@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>--数据统计分析--</title>
+    {% load staticfiles %}
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+    <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/layui.css' %}" media="all">
+    <link rel="stylesheet" href="{% static 'layuiadmin/style/admin.css' %}" media="all">
+
+    <script src="{% static '/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static '/highcharts/code/highcharts.js' %}"></script>
+    <script src="{% static '/highcharts/code/modules/exporting.js' %}"></script>
+    <script src="{% static '/highcharts/code/modules/data.js' %}"></script>
+    <script src="{% static '/highcharts/code/modules/heatmap.js' %}"></script>
+</head>
+
+<body>
+
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div>
+                <form class="layui-form" action="">
+                    <div class="layui-col-md2">
+                        <select name="year" lay-filter="YearMonDay">
+                            <option value="">请选择按年/月/日统计</option>
+                            <option value="year">按年统计</option>
+                            <option value="month">按月统计</option>
+                            <option value="day">按日统计</option>
+                        </select>
+                    </div>
+                    <div class="layui-col-md1 layui-col-md-offset1">
+                        <select name="Date" lay-filter="Date" id="date">
+                            <option value="">选择日期</option>
+                        </select>
+                    </div>
+
+                </form>
+            </div>
+            <div class="layui-col-md12">
+                <div class="layui-row layui-col-space15">
+
+                    <div class="layui-col-md12">
+                        <div class="layui-card">
+                            <div class="layui-card-header">温度最大最小值</div>
+                            <div class="layui-card-body">
+                                <div id="container1" style="margin: 0 auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-col-md12">
+                        <div class="layui-card">
+                            <div class="layui-card-header">湿度最大最小值</div>
+                            <div class="layui-card-body">
+                                <div id="container2" style="margin: 0 auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <pre id="cav" style="display: none">{{ Temdata }}</pre>
+    <pre id="csv" style="display: none">{{ Humdata }}</pre>
+    <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
+    <script src="{% static 'layuiadmin/modules/laybind.js' %}"></script>
+
+    <script>
+        var element;
+        var add;
+        layui.config({
+            base: "{% static 'layuiadmin/' %}" //静态资源所在路径
+        }).extend({
+            index: 'lib/index' //主入口模块
+        }).use(['index', 'console', 'form', 'laytpl', 'element', 'layer'], function () {
+            element = layui.element;
+            var form = layui.form;
+
+            form.on('select(YearMonDay)', function (data) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/getSensorDate',
+                    data: {
+                        date: data.value
+                    },
+                    success: function (data) {
+                        $("#date").empty();
+                        $("#date").append("<option>选择日期</option>");
+
+                        for (var i = 0; i < data.data.length; i++) {
+
+                            $("#date").append("<option value=" + data.data[i].id + "> " + data.data[i].date + "</option>")
+
+                        }
+                        form.render();
+                    }
+                })
+            });
+
+            form.on('select(Date)', function (data) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/getMinMaxData',
+                    data: {
+                        date: data.value
+                    },
+                    success: function (data) {
+                        var chart1 = Highcharts.chart('container1', {
+                            chart: {
+                                type: 'line'
+                            },
+                            title: {
+                                text: '月最高/低气温'
+                            },
+                            subtitle: {
+                                text: '数据来源: WorldClimate.com'
+                            },
+                            xAxis: {
+                                categories: data.data.date
+                            },
+                            yAxis: {
+                                title: {
+                                    text: '气温 (°C)'
+                                }
+                            },
+                            plotOptions: {
+                                line: {
+                                    dataLabels: {
+                                        enabled: true          // 开启数据标签
+                                    },
+                                    enableMouseTracking: true // 关闭鼠标跟踪，对应的提示框、点击事件会失效
+                                }
+                            },
+                            series: [{
+                                name: '最高值',
+                                data: data.data.TemVal.max
+                            }, {
+                                name: '最低值',
+                                data: data.data.TemVal.min
+                            }]
+                        });
+                        var chart2 = Highcharts.chart('container2', {
+                            chart: {
+                                type: 'line'
+                            },
+                            title: {
+                                text: '日最高/低湿度'
+                            },
+                            subtitle: {
+                                text: '数据来源: WorldClimate.com'
+                            },
+                            xAxis: {
+                                categories: data.data.date
+                            },
+                            yAxis: {
+                                title: {
+                                    text: '湿度 (%)'
+                                }
+                            },
+                            plotOptions: {
+                                line: {
+                                    dataLabels: {
+                                        enabled: true          // 开启数据标签
+                                    },
+                                    enableMouseTracking: true // 关闭鼠标跟踪，对应的提示框、点击事件会失效
+                                }
+                            },
+                            series: [{
+                                name: '最高值',
+                                data: data.data.HumVal.max
+                            }, {
+                                name: '最低值',
+                                data: data.data.HumVal.min
+                            }]
+                        });
+                    }
+                })
+            });
+
+        });
+
+    </script>
+    <script>
+        Highcharts.setOptions({
+            lang: {
+                months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                weekdays: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+            },
+            global: {
+                useUTC: false
+            }
+        });
+        var dat = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十s三月'];
+        var chart1 = Highcharts.chart('container1', {
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: '月平均气温'
+            },
+            subtitle: {
+                text: '数据来源: WorldClimate.com'
+            },
+            xAxis: {
+                categories: dat
+            },
+            yAxis: {
+                title: {
+                    text: '气温 (°C)'
+                }
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true          // 开启数据标签
+                    },
+                    enableMouseTracking: true // 关闭鼠标跟踪，对应的提示框、点击事件会失效
+                }
+            },
+            series: [{
+                name: '最高值',
+                data: []
+            }, {
+                name: '最低值',
+                data: []
+            }]
+        });
+        var chart2 = Highcharts.chart('container2', {
+            chart: {
+                type: 'line'
+            },
+            title: {
+                text: '日平均湿度'
+            },
+            subtitle: {
+                text: '数据来源: WorldClimate.com'
+            },
+            xAxis: {
+                categories: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+            },
+            yAxis: {
+                title: {
+                    text: '湿度 (%)'
+                }
+            },
+            plotOptions: {
+                line: {
+                    dataLabels: {
+                        enabled: true          // 开启数据标签
+                    },
+                    enableMouseTracking: true // 关闭鼠标跟踪，对应的提示框、点击事件会失效
+                }
+            },
+            series: [{
+                name: '最高值',
+                data: []
+            }, {
+                name: '最低值',
+                data: []
+            }]
+        });
+
+    </script>
+
+    <script>
+        Date.prototype.format = function (fmt) {
+            var o = {
+                "M+": this.getMonth() + 1,                 //月份 
+                "d+": this.getDate(),                    //日 
+                "h+": this.getHours(),                   //小时 
+                "m+": this.getMinutes(),                 //分 
+                "s+": this.getSeconds(),                 //秒 
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+                "S": this.getMilliseconds()             //毫秒 
+            };
+            if (/(y+)/.test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            }
+            for (var k in o) {
+                if (new RegExp("(" + k + ")").test(fmt)) {
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                }
+            }
+            return fmt;
+        }        
+    </script>
+    <script>
+
+    </script>
+</body>
+
+</html>

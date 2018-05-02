@@ -97,7 +97,6 @@
           $("#all-select-Factory").empty();
           $("#all-select-Factory").append("<option>选择制造中心</option>");
           for (var i = 0; i < data.data.length; i++) {
-            console.log(data);
             $("#all-select-Factory").append("<option value=" + data.data[i].factorID + "> " + data.data[i].factorDes + "</option>")
           }
           form.render();

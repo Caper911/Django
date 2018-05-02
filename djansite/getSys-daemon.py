@@ -18,6 +18,7 @@ def sentRspiData(webSocketUrl):
         try:
             if reconnect:
                 ws = websocket.create_connection(webSocketUrl)
+                print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())+':'+"Server Connect Success!")
             
             rspiInfo = rspi()
             info= {'datetime':time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'id':'rs01','user':rspiInfo.USER,'IP':rspiInfo.IP,'OsVer':rspiInfo.getOsVersion(),'cpuInfo':rspiInfo.CpuInfo(),
@@ -27,7 +28,8 @@ def sentRspiData(webSocketUrl):
             info['datetime'] =''
             reconnect = False
         except:
-            print("connect error!")
+            print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()) +':'+"Server Connect Error!")
+            time.sleep(1)
             reconnect = True
             
     ws.close()
@@ -111,8 +113,9 @@ class rspi:
 class getInfoDaemon(Daemon):
     #守护进程中的处理函数
     def run(self):
-         sentRspiData(webSocketUrl)
-
+        print("=============================================Daemon Start:")
+        print("====Time:"+ time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
+        sentRspiData(webSocketUrl)
 #初始化类,设定错误/日志输出文件
 if __name__ == '__main__':
     PIDFILE = '/tmp/daemon-getserver.pid'

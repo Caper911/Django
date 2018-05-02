@@ -1,9 +1,10 @@
 from django.shortcuts import render
 
-from bearing.models import cpuInfo,memoryInfo,ioInfo
+from bearing.models import cpuInfo,memoryInfo,ioInfo,TemHumConData
 
 from bearing.models import factory,productDepart,machine,sensorInfo,opStartEnddate,machineRunTime
 from bearing.models import sensorRawData,sensorWaveletData
+from bearing.models import RaspbianInfo
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import auth
 from django.contrib.auth.models import User
@@ -18,6 +19,8 @@ from django.db.models import Q
 from dwebsocket.decorators import accept_websocket, require_websocket
 
 
+from django.db import connection
+from django.db.models import Avg ,Max,Min
 
 # Create your views here.
 @login_required 
@@ -54,6 +57,9 @@ def appMessage(request):
 def ChoiceFactory(request):
     return render(request,'bearing/views/iframe/choiceFactory.html')
 
+def addRaspInfoContent(request):
+    return render(request,'bearing/views/iframe/addRaspInfo.html')
+
 def GridWaveletsmooth(request):
     return render(request,'bearing/views/component/grid/waveletSmooth.html')
 
@@ -63,6 +69,9 @@ def Map(request):
 def raspiDashboard(request):
     return render(request,'bearing/views/raspi/dashboard.html')
 
+def envriDashboard(request):
+    return render(request,'bearing/views/raspi/envridashboard.html')
+
 def testapi(request):
     data = {"code":0,"msg":"","count":1000,"data":[{"id":10000,"username":"user-0","sex":"女","city":"城市-0","sign":"签名-0","experience":255,"logins":24,"wealth":82830700,"classify":"作家","score":57},{"id":10001,"username":"user-1","sex":"男","city":"城市-1","sign":"签名-1","experience":884,"logins":58,"wealth":64928690,"classify":"词人","score":27},{"id":10002,"username":"user-2","sex":"女","city":"城市-2","sign":"签名-2","experience":650,"logins":77,"wealth":6298078,"classify":"酱油","score":31},{"id":10003,"username":"user-3","sex":"女","city":"城市-3","sign":"签名-3","experience":362,"logins":157,"wealth":37117017,"classify":"诗人","score":68},{"id":10004,"username":"user-4","sex":"男","city":"城市-4","sign":"签名-4","experience":807,"logins":51,"wealth":76263262,"classify":"作家","score":6},{"id":10005,"username":"user-5","sex":"女","city":"城市-5","sign":"签名-5","experience":173,"logins":68,"wealth":60344147,"classify":"作家","score":87},{"id":10006,"username":"user-6","sex":"女","city":"城市-6","sign":"签名-6","experience":982,"logins":37,"wealth":57768166,"classify":"作家","score":34},{"id":10007,"username":"user-7","sex":"男","city":"城市-7","sign":"签名-7","experience":727,"logins":150,"wealth":82030578,"classify":"作家","score":28},{"id":10008,"username":"user-8","sex":"男","city":"城市-8","sign":"签名-8","experience":951,"logins":133,"wealth":16503371,"classify":"词人","score":14},{"id":10009,"username":"user-9","sex":"女","city":"城市-9","sign":"签名-9","experience":484,"logins":25,"wealth":86801934,"classify":"词人","score":75}]}
     return JsonResponse(data,safe=False)
@@ -70,9 +79,42 @@ def testapi(request):
 def role(request):
     return render(request,'bearing/views/authority/role.html')
 
+def analysisData(request):
+    Temdata = "Date,Time,Temperature\n"
+    Humdata = "Date,Time,Humidity\n"
+    Temresult = TemHumConData.objects.extra(select={'year':'year(saveDate)','month':'month(saveDate)','day':'day(saveDate)','hour':'hour(saveDate)'}).values('year','month','day','hour').annotate(TemMax=Max('TemValue'),TemMin=Min('TemValue'),TemAvg=Avg('TemValue'))
+    Humresult = TemHumConData.objects.extra(select={'year':'year(saveDate)','month':'month(saveDate)','day':'day(saveDate)','hour':'hour(saveDate)'}).values('year','month','day','hour').annotate(TemMax=Max('HumValue'),TemMin=Min('HumValue'),TemAvg=Avg('HumValue'))
+    for info in Temresult:
+        data = str(info['year'])+'-'+str(info['month'])+'-'+str(info['day'])+','+str(info['hour'])+','+str(round(info['TemAvg'],1))+'\n'
+        Temdata+=data
+        
+    for info in Humresult:
+        data = str(info['year'])+'-'+str(info['month'])+'-'+str(info['day'])+','+str(info['hour'])+','+str(round(info['TemAvg'],1))+'\n'
+        Humdata+=data
+    
+    
+    return render(request,'bearing/views/analysisData/index.html', {'Temdata': Temdata[:-1],'Humdata':Humdata[:-1]})
+
+
+def MaxMinData(request):
+    return render(request,'bearing/views/analysisData/MaxMin.html')
+
+def Workheatmap(request):
+    return render(request,'bearing/views/analysisData/workheatmap.html')
+
+
+def ManageFactory(request):
+    return render(request,'bearing/views/manage/managefactory.html')
+
+def ManageRasp(request):
+    return render(request,'bearing/views/manage/managerasp.html')
+
+
+
 @login_required 
 def setUserInfo(request):
     return render(request,'bearing/views/set/user/info.html')
+
 @login_required 
 def setUserPassword(request):
     return render(request,'bearing/views/set/user/password.html')
@@ -138,7 +180,7 @@ def dealLogin(request):
 #用户信息修改处理函数
 #{
 #  "code": 0
-#  ,"msg": "登入成功"
+#  ,"msg": "信息修改成功!
 #  ,"data": {
 #    
 #  }
@@ -288,7 +330,6 @@ def SendSMS(cellphone,vercode):
 #    
 #  }
 #}
-
 def dealReg(request):
     arr = {"code":1,"msg":"你已注册成功，等待审核","data":{}}
     
@@ -321,9 +362,8 @@ def dealReg(request):
     return JsonResponse(arr,safe=False)
 
 
-
-
 #######################################################
+# 验证码代码开始
 from PIL import (
     Image, ImageDraw, ImageFont, ImageFilter
 )
@@ -437,11 +477,13 @@ def captcha(request):
     request.session['VerCodeKey']=captcha.captcha_code
     print(request.session['VerCodeKey'])               
     return HttpResponse(im_buf, content_type='image/jpeg')
+
 #    return JsonResponse({'recode': 1,
 #                         'remsg': '获取成功！',
 #                         'data': {'timestamp': tk, 'captcha': b64encode(im_buf.read()).decode('utf-8')}})
 
-
+## 验证码代码结束
+    
 ################################################################################
 #手机验证码处理函数
 #{
@@ -576,6 +618,7 @@ def ajax_dict_realtime(request):
     lastInfo = get_last_info(info)
 
     return JsonResponse(lastInfo,safe=False) #将接口状态返回给请求者
+
 
 #接受从数据采集节点传送过来的数据，并保存到数据库中
 def saveInfo(request):
@@ -747,6 +790,100 @@ def getOpcodeByMachineID(request):
     else:
         statue = '404'
         return JsonResponse(statue,safe=False)
+    
+    
+    
+#获取数据分析中的日期
+def getSensorDate(request):
+    arr = {"code":0,"msg":"成功!","data":[]}
+    #检测请求的方式是post，并且post请求有数据
+    if request.method == "POST" and request.POST:
+        date = request.POST['date']
+        if not date is None :
+            if date == "year":
+                select = {'year':'year(saveDate)'}
+                allinfo = TemHumConData.objects.extra(select=select).values('year').distinct()
+                alldate = []
+                
+                for info in allinfo:
+                    alldate.append({'id':str(info['year']),'date':str(info['year'])})
+                
+                allinfo = alldate
+    
+            elif date == "month":
+                select = {'year':'year(saveDate)','month':'month(saveDate)'}
+                allinfo = TemHumConData.objects.extra(select=select).values('year','month').distinct()
+                
+                alldate = []
+                
+                for info in allinfo:
+                    alldate.append({'id':str(info['year'])+'-'+str(info['month']),'date':str(info['year'])+'-'+str(info['month'])})
+                
+                allinfo = alldate
+                
+            elif date == "day":
+                pass
+                    
+            arr['data'] = list(allinfo)
+
+        else:
+            arr['code'] = 1
+            arr['msg'] = '参数错误!'
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 1
+        arr['msg'] = '错误，请求方式务必为POST!'
+        return JsonResponse(arr,safe=False)
+    
+    
+#获取数据分析中的日期
+import calendar
+def getMinMaxData(request):
+    arr = {"code":0,"msg":"成功!","data":{'date':[],'TemVal':{'min':[],'max':[]},'HumVal':{'min':[],'max':[]}}}
+
+    #检测请求的方式是post，并且post请求有数据
+    if request.method == "POST" and request.POST:
+        date = request.POST['date']
+        if not date is None :
+            if len(date) == 4:
+                arr['data']['TemVal'] = {'min':[0,0,0,0,0,0,0,0,0,0,0,0],'max':[0,0,0,0,0,0,0,0,0,0,0,0]}
+                arr['data']['HumVal'] = {'min':[0,0,0,0,0,0,0,0,0,0,0,0],'max':[0,0,0,0,0,0,0,0,0,0,0,0]}
+                arr['data']['date'] = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+                allinfo = TemHumConData.objects.extra(select={'year':'year(saveDate)','month':'month(saveDate)'}).values('year','month').annotate(TemMax=Max('TemValue'),HumMax=Max('HumValue'),TemMin=Min('TemValue'),HumMin=Min('HumValue')).filter(saveDate__year=date)
+                for info in allinfo:
+                    arr['data']['TemVal']['min'][info['month']-1] = info['TemMin']
+                    arr['data']['TemVal']['max'][info['month']-1] = info['TemMax']
+                    arr['data']['HumVal']['min'][info['month']-1] = info['HumMin']
+                    arr['data']['HumVal']['max'][info['month']-1] = info['HumMax']
+    
+            elif len(date) >=6 and len(date) <= 7:
+                year,month = date.split('-')
+                year = int(year)
+                month = int(month)
+                allinfo = TemHumConData.objects.extra(select={'year':'year(saveDate)','month':'month(saveDate)','day':'day(saveDate)'}).values('year','month','day').annotate(TemMax=Max('TemValue'),TemMin=Min('TemValue'),HumMax=Max('HumValue'),HumMin=Min('HumValue')).filter(Q(saveDate__year=year) & Q(saveDate__month=month))
+                
+                for i in range(calendar.monthrange(year, month)[1]+1)[1:]:
+                    arr['data']['date'].append(str(i)+'号')
+                    arr['data']['TemVal']['min'].append(0)
+                    arr['data']['TemVal']['max'].append(0)
+                    arr['data']['HumVal']['min'].append(0)
+                    arr['data']['HumVal']['max'].append(0)
+                    
+                for info in allinfo:
+                    arr['data']['TemVal']['min'][info['day']-1] = info['TemMin']
+                    arr['data']['TemVal']['max'][info['day']-1] = info['TemMax']
+                    arr['data']['HumVal']['min'][info['day']-1] = info['HumMin']
+                    arr['data']['HumVal']['max'][info['day']-1] = info['HumMax']
+            print(arr)
+        else:
+            arr['code'] = 1
+            arr['msg'] = '参数错误!'
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 1
+        arr['msg'] = '错误，请求方式务必为POST!'
+        return JsonResponse(arr,safe=False)
+    
 
 ##############################################################
 #小波去噪函数
@@ -823,7 +960,7 @@ UNRULY_PASSENGERS = [146,184,235,200,226,251,299,273,281,304,203]
 def getWaveletDataToCsv(request):
   # Create the HttpResponse object with the appropriate CSV header.
   response = HttpResponse(content_type='text/csv')
-  response['Content-Disposition'] = 'attachment; filename=OutData.csv'
+  #response['Content-Disposition'] = 'attachment; filename=OutData.csv'
  
   # Create the CSV writer using the HttpResponse as the "file."
   writer = csv.writer(response)
@@ -835,32 +972,178 @@ def getWaveletDataToCsv(request):
 
 
 ##################################################################
+
+
+
+##################################################################
 #
 import json
 from django.core.cache import cache
-@require_websocket
-def TestSocket(request):
-    while True:
-        message = request.websocket.wait()   
-        
-        Info = json.loads(message)
-        
-        for key,value in Info.items():
-            cache.set(key, json.dumps(value))
+
 
 @require_websocket
-def sentTestSocket(request):
+def recTemHumSmogSocket(request):
+    Info = None
+    while True:
+        message = request.websocket.wait()   
+        if not message is None:
+            Info = json.loads(message)
+
+        #RaspId = Info.id
+        RaspId = 'rs01'
+        #print(message)
+        if not Info is None:
+            for key,value in Info.items():
+                cache.set( RaspId+':'+key , json.dumps(value),timeout=None)
+            save = TemHumConData.objects.create(TemValue= Info['temperature'],HumValue=Info['humidity'], ConValue=Info['concentration'])
+            save.save()
+ 
+    
+@require_websocket
+def recRaspInfoSocket(request):
+    Info = None
+    while True:
+        message = request.websocket.wait()
+        
+        if not message is None:
+            Info = json.loads(message)
+           
+        
+        #RaspId = Info.id
+        RaspId = 'rs01'
+        if not Info is None:
+            for key,value in Info.items():
+                cache.set(RaspId+':'+key, json.dumps(value),timeout=None)
+
+       
+@require_websocket
+def sentTemHumSmogSocket(request):
+    
     #message = request.websocket.wait()
-    key = ['user','IP','cpuInfo','MemoryInfo','IOInfo','HardDiskInfo']
+    #RaspId = message
+    key = ['humidity','temperature','concentration','datetime']
+    
     data = {}
+    RaspId = 'rs01'
     while True:
         for i in range(len(key)):    
-            data[key[i]]=json.loads(cache.get(key[i]))
+            data[key[i]]=json.loads(cache.get(RaspId+':'+key[i]))
         
         message = str(json.dumps(data)).encode(encoding="utf-8")
         request.websocket.send(message)
         time.sleep(1)
+
+@require_websocket
+def sentRaspInfoSocket(request):
+    #rec the id code
+    #message = request.websocket.wait()
+    #RaspId = message
+    key = ['datetime','user','IP','cpuInfo','MemoryInfo','IOInfo','HardDiskInfo','OsVer']
+    data = {}
+    RaspId = 'rs01'
+    while True:
+        for i in range(len(key)):    
+            data[key[i]]=json.loads(cache.get(RaspId+':'+key[i]))
+        
+        message = str(json.dumps(data)).encode(encoding="utf-8")
+        request.websocket.send(message)
+        time.sleep(1)
+   
+##############################################################
+# DATA API
+
+# SEND BACK RASP INFO DATA
+#
+# {"code":0,"msg":"","count":1000,"data":[
+# {"id":10000,"username":"user-0","sex":"女","city":"城市-0","sign":"签名-0","experience":255,"logins":24,"wealth":82830700,"classify":"作家","score":57} 
+#]}
+
+def getRaspInfo(request):
+    
+    arr = {"code":0,"msg":"","count":0,"data":[]}
+    
+    page = request.GET['page']
+    limit = request.GET['limit']
+    
+  
+    Depart = RaspbianInfo.objects.all()
+    arr['count'] = len(Depart)
+    for info in Depart[(int(page)-1)*int(limit):int(page)*int(limit)]:
+        arr['data'].append({"RaspID":info.RaspID,"RaspDes":info.RaspDes,"location":info.location,"saveDate":info.saveDate,"productDepart":info.productDepart.depatrDes,"factory":info.productDepart.factory.factorDes})
+    
+    return JsonResponse(arr,safe=False)
+
+
+# ADD A RASP INFO
+# 
+
+def addRaspInfo(request):
+    arr = {"code":200,"msg":"上位机信息添加成功！","data":{}}
+    
+    if request.method == "POST" and request.POST:
+
+        RaspID = request.POST['RaspID']
+        RaspDes = request.POST['RaspDes']
+        location = request.POST['location']
+        DepartID = request.POST['productDepart']
+        
+        
+        Depart = productDepart.objects.get(departID=DepartID)
+        
+        
+        info = RaspbianInfo.objects.create(RaspID=RaspID,RaspDes=RaspDes,location=location,productDepart=Depart)
+        info.save()
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 500
+        arr['msg'] = "请求方式错误，需POST方法"
+        return JsonResponse(arr,safe=False)
     
     
     
+# DEL A RASP INFO
+# 
+
+def delRaspInfo(request):
+    arr = {"code":200,"msg":"上位机删除成功！","data":{}}
+    
+    if request.method == "POST" and request.POST:
+
+        RaspID = request.POST['RaspID']
+        
+        try:
+            
+            RaspbianInfo.objects.filter(RaspID=RaspID).delete()
+        except:
+            arr['code'] = 500
+            arr['msg'] = "删除出错！"
+            return JsonResponse(arr,safe=False)
+        
+        else:    
+            return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 500
+        arr['msg'] = "请求方式错误，需POST方法"
+        return JsonResponse(arr,safe=False)
+    
+# Get last ID IN RaspInfo
+
+def getLastIDInRaspInfo(request):
+    arr = {"code":200,"msg":"获取编号成功！","data":{}}
+    if request.method == "POST":
+        ID = 0
+        info = RaspbianInfo.objects.last()
+        if info is None:
+            ID = 1
+        else:
+            ID = info.RaspID + 1
+            
+        arr['data']['ID'] = ID
+        print(ID)
+           
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 500
+        arr['msg'] = "请求方式错误，需POST方法"
+        return JsonResponse(arr,safe=False)
     

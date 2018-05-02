@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-
-
 from __future__ import print_function
 import time
 import json
@@ -9,163 +7,207 @@ import websocket
 from RF24 import *
 import RPi.GPIO as GPIO
 
-irq_gpio_pin = None
 
-########### USER CONFIGURATION ###########
-# See https://github.com/TMRh20/RF24/blob/master/pyRF24/readme.md
+### 守护进程 库文件
+import os
+import sys
+import time
 
-# CE Pin, CSN Pin, SPI Speed
-
-# Setup for GPIO 22 CE and CE0 CSN with SPI Speed @ 8Mhz
-#radio = RF24(RPI_V2_GPIO_P1_15, BCM2835_SPI_CS0, BCM2835_SPI_SPEED_8MHZ)
+from daemon import Daemon
 
 
+# 发送数据
+def sentRspiData(webSocketUrl,info):
+    reconnect = True
 
-#RPi B+
-# Setup for GPIO 22 CE and CE0 CSN for RPi B+ with SPI Speed @ 8Mhz
-#radio = RF24(RPI_BPLUS_GPIO_J8_15, RPI_BPLUS_GPIO_J8_24, BCM2835_SPI_SPEED_8MHZ)
+    while True:
+        try:
+            if reconnect:
+                ws = websocket.create_connection(webSocketUrl)
+                print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())+':'+"Server Connect Success!")
+            
+            rspiInfo = rspi()
+            info= {'datetime':time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'id':'rs01','user':rspiInfo.USER,'IP':rspiInfo.IP,'OsVer':rspiInfo.getOsVersion(),'cpuInfo':rspiInfo.CpuInfo(),
+                 'MemoryInfo':rspiInfo.MemoryInfo(),'IOInfo':rspiInfo.IOInfo(), 'HardDiskInfo':rspiInfo.HardDiskInfo() }
 
-# RPi Alternate, with SPIDEV - Note: Edit RF24/arch/BBB/spi.cpp and  set 'this->device = "/dev/spidev0.0";;' or as listed in /dev
-radio = RF24(22, 0);
-
-
-# Setup for connected IRQ pin, GPIO 24 on RPi B+; uncomment to activate
-#irq_gpio_pin = RPI_BPLUS_GPIO_J8_18
-#irq_gpio_pin = 24
+            ws.send(json.dumps(info))
+            info['datetime'] =''
+            reconnect = False
+        except:
+            print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()) +':'+"Server Connect Error!")
+            time.sleep(1)
+            reconnect = True
+            
+    ws.close()
+            
 
 ##########################################
 def try_read_data(channel=0):
+    # 判断信道是否可用
     if radio.available():
+        reconnect = True
+
         while radio.available():
             len = radio.getDynamicPayloadSize()
             receive_payload = radio.read(len)
             
+            #打印数据等信息
             print('时间：'+ time.strftime('%Y-%m-%d %H:%M:%S',time.localtime(time.time())))
             print('接受到数据的长度={} 源数据="{}"'.format(len, receive_payload.decode('utf-8')))
+            # 对收到的数据进行截取
             arr = receive_payload.decode('utf-8').split(',')
             print('湿度:' + str(arr[0]) +'%')
             print('温度:' + str(arr[1]) +'℃')
             print('可燃气体浓度:' + str(arr[2]) +'\n')
-            # First, stop listening so we can talk
+            # 停止监听
             radio.stopListening()
-                
-
+            
             info= {'id':'rs01','humidity':arr[0],'temperature':arr[1],'concentration':arr[2] }
-       
             
-            loop = True
-            reconnect = True
-            
-            while loop:
-                try:
-                    if reconnect:
-                        ws = websocket.create_connection(webSocketUrl)
-            
-                    ws.send(json.dumps(info))
-
-                except:
-                    print("connect error!")
-                    time.sleep(1)
-                    reconnect = True
-                    loop = True
-                else:
-                    reconnect = False
-                    loop = False
+            # 逻辑是 接收一次数据就发送，发送不成功则丢弃本次数据
+            try:
+                if reconnect:
+                    ws = websocket.create_connection(webSocketUrl)
+                    print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime())+':'+"Server Connect Success!")
     
-            
-            # Send the final one back.
-            radio.write(receive_payload)
-            #print('Sent response.')
+                ws.send(json.dumps(info))
 
-            # Now, resume listening so we catch the next packets.
+            except:
+                print(time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()) +':'+"Server Connect Error!")
+                time.sleep(1)
+                reconnect = True
+            # 
+            else:
+                reconnect = False
+  
+            # 向发送端发送响应
+            radio.write(receive_payload)
+            
+            # 继续监听数据的到来
             radio.startListening()
 
-pipes = [0xE8E8F0F0E1, 0xE8E8F0F0E1]
-min_payload_size = 4
-max_payload_size = 32
-payload_size_increments_by = 1
-next_payload_size = min_payload_size
-inp_role = '0'
-send_payload = b'ABCDEFGHIJKLMNOPQRSTUVWXYZ789012'
-millis = lambda: int(round(time.time() * 1000))
-webSocketUrl = "ws://192.168.123.134:8000/socket/sentTemHumSmogSocket"
-
-reconnect = True
-
-print('上位机接收数据程序')
-radio.begin()
-radio.enableDynamicPayloads()
-radio.setRetries(15,15)
-radio.printDetails()
-
-print(' ************ Role Setup *********** ')
-while (inp_role !='0') and (inp_role !='1'):
-    inp_role = str(input('等待数据的到达( CTRL+C 退出) '))
-
-#初始化程序
-if inp_role == '0':
-    print('Role: Pong Back, awaiting transmission')
-    if irq_gpio_pin is not None:
-        # set up callback for irq pin
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(irq_gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(irq_gpio_pin, GPIO.FALLING, callback=try_read_data)
-
-    radio.openWritingPipe(pipes[1])
-    radio.openReadingPipe(1,pipes[0])
-    radio.startListening()
-else:
-    print('Role: Ping Out, starting transmission')
-    radio.openWritingPipe(pipes[0])
-    radio.openReadingPipe(1,pipes[1])
-
-# forever loop
-while 1:
-    if inp_role == '1':   # ping out
-        # The payload will always be the same, what will change is how much of it we send.
-
-        # First, stop listening so we can talk.
-        radio.stopListening()
-
-        # Take the time, and send it.  This will block until complete
-        print('Now sending length {} ... '.format(next_payload_size), end="")
-        radio.write(send_payload[:next_payload_size])
-
-        # Now, continue listening
+##########################################
+def InitRadio(inp_role):
+    #初始化程序
+    if inp_role == '0':
+        print('角色: 接收端, 等待数据传输...')
+        if irq_gpio_pin is not None:
+            GPIO.setmode(GPIO.BCM)
+            GPIO.setup(irq_gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            GPIO.add_event_detect(irq_gpio_pin, GPIO.FALLING, callback=try_read_data)
+        #设置
+        # pipes[1] 为发送信道
+        # pipes[0] 为接收信道
+        radio.openWritingPipe(pipes[1])
+        radio.openReadingPipe(1,pipes[0])
         radio.startListening()
-
-        # Wait here until we get a response, or timeout
-        started_waiting_at = millis()
-        timeout = False
-        while (not radio.available()) and (not timeout):
-            if (millis() - started_waiting_at) > 500:
-                timeout = True
-
-        # Describe the results
-        if timeout:
-            print('failed, response timed out.')
-        else:
-            # Grab the response, compare, and send to debugging spew
-            len = radio.getDynamicPayloadSize()
-            receive_payload = radio.read(len)
-
-            # Spew it
-            print('got response size={} value="{}"'.format(len, receive_payload.decode('utf-8')))
-
-        # Update size for next time.
-        next_payload_size += payload_size_increments_by
-        if next_payload_size > max_payload_size:
-            next_payload_size = min_payload_size
-        time.sleep(0.1)
     else:
-        # Pong back role.  Receive each packet, dump it out, and send it back
+        print('角色: 发送端， 数据发送中...')
+        #设置
+        # pipes[0] 为发送信道
+        # pipes[1] 为接收信道
+        radio.openWritingPipe(pipes[0])
+        radio.openReadingPipe(1,pipes[1])
+    
+##########################################
+def SendOrRecData(inp_role):
+    while 1:
+        if inp_role == '1':   # 角色:发送端
+            radio.stopListening()
+            print('正在发送... 长度为 {} ... '.format(len(send_payload)), end="")
+            radio.write(send_payload[])
 
-        # if there is data ready
-        if irq_gpio_pin is None:
-            # no irq pin is set up -> poll it
-            try_read_data()
+            # 发送完毕后，监听接收端的响应
+            radio.startListening()
+
+            # 等待时间
+            started_waiting_at = millis()
+            timeout = False
+            
+            while (not radio.available()) and (not timeout):
+                if (millis() - started_waiting_at) > 500:
+                    timeout = True
+            
+            if timeout:
+                print('接收错误！, 响应时间过长.')
+            else:
+                len = radio.getDynamicPayloadSize()
+                receive_payload = radio.read(len)
+                print('接收到响应 长度为{} 数据为"{}"'.format(len, receive_payload.decode('utf-8')))
+
+            time.sleep(1)
         else:
-            # callback routine set for irq pin takes care for reading -
-            # do nothing, just sleeps in order not to burn cpu by looping
-            time.sleep(1000)
+            if irq_gpio_pin is None:
+                try_read_data()
+                time.sleep(1)
+            else:
+                time.sleep(1000)
 
+
+def loopSend():
+
+    radio = RF24(22, 0);
+    # 信道
+    pipes = [0xE8E8F0F0E1, 0xE8E8F0F0E1]
+
+    # 发送测试数据
+    send_payload = b'TEST'
+
+    irq_gpio_pin = None
+    
+    # 设置角色 为接收端
+    # 0为发送端 1为接收端
+    inp_role = '0'
+
+    millis = lambda: int(round(time.time() * 1000))
+
+    # 服务器地址
+    webSocketUrl = "ws://192.168.123.134:8000/socket/recTemHumSmogSocket"
+    
+    print('上位机接收数据程序')
+    
+    # 信道开始
+    radio.begin()
+    radio.enableDynamicPayloads()
+    radio.setRetries(15,15)
+    radio.printDetails()
+
+    print(' ************ Role Setup *********** ')
+    while (inp_role !='0') and (inp_role !='1'):
+        inp_role = str(input('等待数据的到达( CTRL+C 退出) '))
+
+    InitRadio(inp_role)
+    SendOrRecData(inp_role)
+    
+
+
+
+#继承Daemon类，使目标函数成为守护进程
+class getInfoDaemon(Daemon):
+    #守护进程中的处理函数
+    def run(self):
+        print("=============================================Daemon Start:")
+        print("====Time:"+ time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()))
+        loopSend()
+        
+#初始化类,设定错误/日志输出文件
+if __name__ == '__main__':
+    PIDFILE = '/tmp/daemon-sensorSend.pid'
+    ERROR = '/tmp/daemon-sensor-server-error.log'
+    LOG = '/tmp/daemon-sensor-server.log'
+    
+    daemon = getInfoDaemon(pidfile=PIDFILE, stdout=LOG, stderr=ERROR)
+
+    if len(sys.argv) != 2:
+        print('Usage: {} [start|stop]'.format(sys.argv[0]), file=sys.stderr)
+        raise SystemExit(1)
+
+    if 'start' == sys.argv[1]:
+        daemon.start()
+    elif 'stop' == sys.argv[1]:
+        daemon.stop()
+    elif 'restart' == sys.argv[1]:
+        daemon.restart()
+    else:
+        print('Unknown command {!r}'.format(sys.argv[1]), file=sys.stderr)
+        raise SystemExit(1)

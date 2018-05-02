@@ -116,7 +116,23 @@ class sensorWaveletData(models.Model):
     opStartEnddate = models.ForeignKey(opStartEnddate,on_delete=models.CASCADE,)   
     
 
+class TemHumConData(models.Model):
+    TemValue = models.FloatField('温度传感器数据')
+    HumValue = models.FloatField('湿度传感器数据')
+    ConValue = models.FloatField('可燃气体浓度')
+    saveDate = models.DateTimeField('保存日期',default = timezone.now)
 
+
+class RaspbianInfo(models.Model):
+    RaspID = models.AutoField('上位机ID',primary_key=True)
+    RaspDes = models.CharField('上位机描述',max_length=100)
+    saveDate = models.DateTimeField('保存日期',default = timezone.now)
+    modDate = models.DateTimeField('最后修改日期', auto_now = True)
+    location = models.CharField('方位',max_length=20)
+    #is_avtive = models.BooleanField(default=False)
+    productDepart = models.ForeignKey(productDepart,on_delete=models.CASCADE,)
+    
+    
 class cpuInfo(models.Model):
     value = models.FloatField()
     time = models.DateTimeField()

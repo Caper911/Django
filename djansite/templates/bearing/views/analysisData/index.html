@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>--数据统计分析--</title>
+    {% load staticfiles %}
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+
+    <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/layui.css' %}" media="all">
+    <link rel="stylesheet" href="{% static 'layuiadmin/style/admin.css' %}" media="all">
+
+    <script src="{% static '/jquery-3.3.1.min.js' %}"></script>
+    <script src="{% static '/highcharts/code/highcharts.js' %}"></script>
+    <script src="{% static '/highcharts/code/modules/exporting.js' %}"></script>
+    <script src="{% static '/highcharts/code/modules/data.js' %}"></script>
+    <script src="{% static '/highcharts/code/modules/heatmap.js' %}"></script>
+</head>
+
+<body>
+
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md12">
+                <div class="layui-row layui-col-space15">
+
+                    <div class="layui-col-md12">
+                        <div class="layui-card">
+                            <div class="layui-card-header">温度数据热力图</div>
+                            <div class="layui-card-body">
+                                <div id="container1" style="margin: 0 auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="layui-col-md12">
+                        <div class="layui-card">
+                            <div class="layui-card-header">湿度数据热力图</div>
+                            <div class="layui-card-body">
+                                <div id="container2" style="margin: 0 auto"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <pre id="cav" style="display: none">{{ Temdata }}</pre>
+    <pre id="csv" style="display: none">{{ Humdata }}</pre>
+    <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
+    <script src="{% static 'layuiadmin/modules/laybind.js' %}"></script>
+
+    <script>
+        var element;
+        var add;
+        layui.config({
+            base: "{% static 'layuiadmin/' %}" //静态资源所在路径
+        }).extend({
+            index: 'lib/index' //主入口模块
+        }).use(['index', 'console', 'laytpl', 'element', 'layer'], function () {
+            element = layui.element;
+
+        });
+
+    </script>   
+    <script>
+        Highcharts.setOptions({
+            lang: {
+                months: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'],
+                weekdays: ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六']
+            },
+            global: { 
+                useUTC: false 
+            } 
+        });
+        $(function () {
+            /**
+             * This plugin extends Highcharts in two ways:
+             * - Use HTML5 canvas instead of SVG for rendering of the heatmap squares. Canvas
+             *   outperforms SVG when it comes to thousands of single shapes.
+             * - Add a K-D-tree to find the nearest point on mouse move. Since we no longer have SVG shapes
+             *   to capture mouseovers, we need another way of detecting hover points for the tooltip.
+             */
+            (function (H) {
+                var Series = H.Series,
+                    each = H.each;
+                /**
+                 * Create a hidden canvas to draw the graph on. The contents is later copied over
+                 * to an SVG image element.
+                 */
+                Series.prototype.getContext = function () {
+                    if (!this.canvas) {
+                        this.canvas = document.createElement('canvas');
+                        this.canvas.setAttribute('width', this.chart.chartWidth);
+                        this.canvas.setAttribute('height', this.chart.chartHeight);
+                        this.image = this.chart.renderer.image('', 0, 0, this.chart.chartWidth, this.chart.chartHeight).add(this.group);
+                        this.ctx = this.canvas.getContext('2d');
+                    }
+                    return this.ctx;
+                };
+                /**
+                 * Draw the canvas image inside an SVG image
+                 */
+                Series.prototype.canvasToSVG = function () {
+                    this.image.attr({ href: this.canvas.toDataURL('image/png') });
+                };
+                /**
+                 * Wrap the drawPoints method to draw the points in canvas instead of the slower SVG,
+                 * that requires one shape each point.
+                 */
+                H.wrap(H.seriesTypes.heatmap.prototype, 'drawPoints', function () {
+                    var ctx = this.getContext();
+                    if (ctx) {
+                        // draw the columns
+                        each(this.points, function (point) {
+                            var plotY = point.plotY,
+                                shapeArgs,
+                                pointAttr;
+                            if (plotY !== undefined && !isNaN(plotY) && point.y !== null) {
+                                shapeArgs = point.shapeArgs;
+                                pointAttr = (point.pointAttr && point.pointAttr['']) || point.series.pointAttribs(point);
+                                ctx.fillStyle = pointAttr.fill;
+                                ctx.fillRect(shapeArgs.x, shapeArgs.y, shapeArgs.width, shapeArgs.height);
+                            }
+                        });
+                        this.canvasToSVG();
+                    } else {
+                        this.chart.showLoading('Your browser doesn\'t support HTML5 canvas, <br>please use a modern browser');
+                        // Uncomment this to provide low-level (slow) support in oldIE. It will cause script errors on
+                        // charts with more than a few thousand points.
+                        // arguments[0].call(this);
+                    }
+                });
+                H.seriesTypes.heatmap.prototype.directTouch = false; // Use k-d-tree
+            }(Highcharts));
+
+            var start;
+
+            Highcharts.chart('container1', {
+                data: {
+                    csv: document.getElementById('cav').innerHTML,
+                    parsed: function () {
+                        start = +new Date();
+                    }
+                },
+                chart: {
+                    type: 'heatmap',
+                    margin: [60, 10, 80, 50]
+                },
+                title: {
+                    text: '温度热力图',
+                    align: 'left',
+                    x: 40
+                },
+                subtitle: {
+                    text: '2018每天每小时的热力变化',
+                    align: 'left',
+                    x: 40
+                },
+                xAxis: {
+                    type: 'datetime',
+                    min: Date.UTC(2018, 0, 1),
+                    max: Date.UTC(2019, 0, 1),
+                    labels: {
+                        align: 'left',
+                        x: 5,
+                        y: 14,
+                        format: '{value:%B}' // long month
+                    },
+                    showLastLabel: false,
+                    tickLength: 16
+                },
+                yAxis: {
+                    title: {
+                        text: null
+                    },
+                    labels: {
+                        format: '{value}:00'
+                    },
+                    minPadding: 0,
+                    maxPadding: 0,
+                    startOnTick: false,
+                    endOnTick: false,
+                    tickPositions: [0, 6, 12, 18, 24],
+                    tickWidth: 1,
+                    min: 0,
+                    max: 23,
+                    reversed: true
+                },
+                colorAxis: {
+                    stops: [
+                        [0, '#3060cf'],
+                        [0.5, '#fffbbc'],
+                        [0.9, '#c4463a'],
+                        [1, '#c4463a']
+                    ],
+                    min: 0,
+                    max: 35,
+                    startOnTick: false,
+                    endOnTick: false,
+                    labels: {
+                        format: '{value}℃'
+                    }
+                },
+                series: [{
+                    borderWidth: 0,
+                    nullColor: '#EFEFEF',
+                    colsize: 24 * 36e5, // one day
+                    tooltip: {
+                        headerFormat: '温度<br/>',
+                        pointFormat: '{point.x:%e %b, %Y} {point.y}:00: <b>{point.value} ℃</b>'
+                    },
+                    turboThreshold: Number.MAX_VALUE // #3404, remove after 4.0.5 release
+                }]
+            });
+
+            Highcharts.chart('container2', {
+                data: {
+                    csv: document.getElementById('csv').innerHTML,
+                    parsed: function () {
+                        start = +new Date();
+                    }
+                },
+                chart: {
+                    type: 'heatmap',
+                    margin: [60, 10, 80, 50]
+                },
+                title: {
+                    text: '湿度热力图',
+                    align: 'left',
+                    x: 40
+                },
+                subtitle: {
+                    text: '2018每天每小时的湿度变化',
+                    align: 'left',
+                    x: 40
+                },
+                xAxis: {
+                    type: 'datetime',
+                    min: Date.UTC(2018, 0, 1),
+                    max: Date.UTC(2019, 0, 1),
+                    labels: {
+                        align: 'left',
+                        x: 5,
+                        y: 14,
+                        format: '{value:%B}' // long month
+                    },
+                    showLastLabel: false,
+                    tickLength: 16
+                },
+                yAxis: {
+                    title: {
+                        text: null
+                    },
+                    labels: {
+                        format: '{value}:00'
+                    },
+                    minPadding: 0,
+                    maxPadding: 0,
+                    startOnTick: false,
+                    endOnTick: false,
+                    tickPositions: [0, 6, 12, 18, 24],
+                    tickWidth: 1,
+                    min: 0,
+                    max: 23,
+                    reversed: true
+                },
+                colorAxis: {
+                    stops: [
+                        [0, '#F0FFFF'],
+                        [0.5, '#B0C4DE'],
+                        [0.9, '#6495ED'],
+                        [1, '#4169E1']
+                    ],
+                    min: 0,
+                    max: 90,
+                    startOnTick: false,
+                    endOnTick: false,
+                    labels: {
+                        format: '{value}%'
+                    }
+                },
+                series: [{
+                    borderWidth: 0,
+                    nullColor: '#EFEFEF',
+                    colsize: 24 * 36e5, // one day
+                    tooltip: {
+                        headerFormat: '湿度<br/>',
+                        pointFormat: '{point.x:%e %b, %Y} {point.y}:00: <b>{point.value} %</b>'
+                    },
+                    turboThreshold: Number.MAX_VALUE // #3404, remove after 4.0.5 release
+                }]
+            });
+
+            // 计算图表生成时间
+            console.log('Rendered in ' + (new Date() - start) + ' ms'); // eslint-disable-line no-console
+        });
+
+    </script>
+
+    <script>
+        Date.prototype.format = function (fmt) {
+            var o = {
+                "M+": this.getMonth() + 1,                 //月份 
+                "d+": this.getDate(),                    //日 
+                "h+": this.getHours(),                   //小时 
+                "m+": this.getMinutes(),                 //分 
+                "s+": this.getSeconds(),                 //秒 
+                "q+": Math.floor((this.getMonth() + 3) / 3), //季度 
+                "S": this.getMilliseconds()             //毫秒 
+            };
+            if (/(y+)/.test(fmt)) {
+                fmt = fmt.replace(RegExp.$1, (this.getFullYear() + "").substr(4 - RegExp.$1.length));
+            }
+            for (var k in o) {
+                if (new RegExp("(" + k + ")").test(fmt)) {
+                    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(("" + o[k]).length)));
+                }
+            }
+            return fmt;
+        }        
+    </script>
+    <script>
+
+    </script>
+</body>
+
+</html>

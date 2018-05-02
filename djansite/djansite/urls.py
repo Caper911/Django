@@ -28,16 +28,16 @@ urlpatterns = [
     url(r'^testapi/',views.testapi),
     url(r'^appMessage/',views.appMessage),
     url(r'^setUserInfo/',views.setUserInfo),
-    url(r'^api/dealUserChange/',views.dealUserChange),
-    url(r'^api/dealUserPasswrod/',views.dealUserPasswrod),
+
     url(r'^setUserPassword/',views.setUserPassword),
     url(r'^setSystemWebsite/',views.setSystemWebsite),
     url(r'^setSystemEmail/',views.setSystemEmail),
     url(r'^GridWaveletsmooth/',views.GridWaveletsmooth),
     url(r'^getWaveletDataToCsv/',views.getWaveletDataToCsv),
     url(r'^dealWaveletData/',views.dealWaveletData),
-    url(r'^ChoiceFactory/',views.ChoiceFactory),
+
     url(r'^raspiDashboard/',views.raspiDashboard),
+    url(r'^envriDashboard/',views.envriDashboard),
     url(r'^$', views.index),
     url(r'^login/', views.login,name='login'),
     url(r'^logout/', views.logout_view,name='logout'),
@@ -53,16 +53,47 @@ urlpatterns = [
     url(r'^api/getmem',views.saveInfo),
     url(r'^ajax_19info/$',views.getlast19_info,name='ajax_19info'),
     url(r'^getCpuInfo_filter/$',views.getCpuInfo_filter),
+    url(r'^analysisData$',views.analysisData),
+#####################View
+    url(r'^analysisData$',views.analysisData), 
+    url(r'^MaxMinData$',views.MaxMinData),
+    url(r'^Workheatmap$',views.Workheatmap), 
+    url(r'^ChoiceFactory/$',views.ChoiceFactory),
+
+#####################Manage
+    url(r'^ManageFactory$',views.ManageFactory),
+    url(r'^ManageRasp$',views.ManageRasp),   
+
+
+#####################api
     url(r'^api/getSensorData/$',views.getSensorData),
     url(r'^api/getSensor$',views.getSensor),
     url(r'^api/getMachine$',views.getMachine),
+    url(r'^api/dealUserChange/',views.dealUserChange),
+    url(r'^api/dealUserPasswrod/',views.dealUserPasswrod),
     url(r'^getOpcodeByMachineID$',views.getOpcodeByMachineID),
-    url(r'^socket/TestSocket$',views.TestSocket),
-    url(r'^socket/sentTestSocket$',views.sentTestSocket),
     url(r'^api/getNav$',views.getNav),
     url(r'^api/getDepart$',views.getDepart),
     url(r'^api/getMachineRunTime$',views.getMachineRunTime),
+    url(r'^api/getRaspInfo$',views.getRaspInfo),
+    url(r'^api/addRaspInfo$',views.addRaspInfo),
+    url(r'^api/delRaspInfo$',views.delRaspInfo),
+    url(r'^api/getLastIDInRaspInfo$',views.getLastIDInRaspInfo),
+       
+    url(r'^api/getSensorDate$',views.getSensorDate),
+    url(r'^api/getMinMaxData$',views.getMinMaxData),
+#####################socket
+    url(r'^socket/recRaspInfoSocket$',views.recRaspInfoSocket),
+    url(r'^socket/sentRaspInfoSocket$',views.sentRaspInfoSocket),
+    url(r'^socket/recTemHumSmogSocket',views.recTemHumSmogSocket),
+    url(r'^socket/sentTemHumSmogSocket',views.sentTemHumSmogSocket),
+
     url(r'^user/captcha/$',views.captcha),
     url(r'^apiTokenAuth/$', VIEW.obtain_auth_token),
+       
+#####################Iframe Content
+    url(r'^addRaspInfo$',views.addRaspInfoContent)
+    
+    
 ]
 

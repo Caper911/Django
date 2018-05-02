@@ -64,7 +64,7 @@ def try_read_data(radio,webSocketUrl,channel=0):
 
 ##########################################
 def try_read_dataa(radio,channel=0):
-    # 判断信道是否可用
+    # 判断是否有数据
     if radio.available():
         
         while radio.available():
@@ -82,7 +82,7 @@ def try_read_dataa(radio,channel=0):
             # 继续监听数据的到来
             radio.startListening()
     
-    return info
+        return info
 
 ##########################################
 def InitRadio(radio,pipes,inp_role,irq_gpio_pin):

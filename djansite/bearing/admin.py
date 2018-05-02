@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 # Register your models here.
 from bearing.models import Profile,factory,productDepart,machine,sensorInfo,opStartEnddate,sensorRawData,sensorWaveletData,machineRunTime
-
+from bearing.models import RaspbianInfo
 # Define an inline admin descriptor for Employee model
 # which acts a bit like a singleton
 class AdminInline(admin.StackedInline):
@@ -28,4 +28,5 @@ admin.site.register(opStartEnddate)
 admin.site.register(sensorRawData)
 admin.site.register(sensorWaveletData)
 admin.site.register(machineRunTime)
+admin.site.register(RaspbianInfo)
  

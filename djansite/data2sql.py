@@ -204,7 +204,7 @@ class rspi:
         cpuEachPercent = psutil.cpu_percent(percpu = True)
         # current -> [1] highest -> [2]
         if len(psutil.sensors_temperatures()) ==0:
-            cpuTemperature =99
+            cpuTemperature = 99
         else:
             cpuTemperature = psutil.sensors_temperatures()['coretemp'][0]
         
@@ -262,7 +262,7 @@ class rspi:
                 'disk_free':disk_free,'disk_percent':disk_percent} 
 
 
-webSocketUrl = "http://127.0.0.1:8000/socket/TestSocket"
+webSocketUrl = "ws://192.168.123.134:8000/socket/recRaspInfoSocket"
 import json
 def sentRspiData(webSocketUrl):
    
@@ -274,10 +274,11 @@ def sentRspiData(webSocketUrl):
                 ws = websocket.create_connection(webSocketUrl)
             
             rspiInfo = rspi()
-            info= {'user':rspiInfo.USER,'IP':rspiInfo.IP,'cpuInfo':rspiInfo.CpuInfo(),
+            info= {'datetime':time.strftime("%Y-%m-%d %H:%M:%S",time.localtime()),'user':rspiInfo.USER,'IP':rspiInfo.IP,'cpuInfo':rspiInfo.CpuInfo(),
                  'MemoryInfo':rspiInfo.MemoryInfo(),'IOInfo':rspiInfo.IOInfo(), 'HardDiskInfo':rspiInfo.HardDiskInfo() }
        
             ws.send(json.dumps(info))
+            info['datetime'] =''
             reconnect = False
         except:
             print("connect error!")
@@ -316,7 +317,7 @@ if __name__ == "__main__":
     #insertData()
     #Data()
     #count()
-    sentRspiData('ws://127.0.0.1:8000/socket/TestSocket')
+    sentRspiData('ws://192.168.123.134:8000/socket/recRaspInfoSocket')
     print('Done!')
 
 

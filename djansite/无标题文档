@@ -1,0 +1,66 @@
+
+
+
+
+
+
+
+
+
+
+reconnect = True
+
+print('上位机接收数据程序')
+radio.begin()
+radio.enableDynamicPayloads()
+radio.setRetries(15,15)
+radio.printDetails()
+
+
+
+#初始化程序
+if inp_role == '0':
+    print('Role: Pong Back, awaiting transmission')
+    if irq_gpio_pin is not None:
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(irq_gpio_pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(irq_gpio_pin, GPIO.FALLING, callback=try_read_data)
+
+    radio.openWritingPipe(pipes[1])
+    radio.openReadingPipe(1,pipes[0])
+    radio.startListening()
+else:
+    print('Role: Ping Out, starting transmission')
+    radio.openWritingPipe(pipes[0])
+    radio.openReadingPipe(1,pipes[1])
+
+# 死循环
+while 1:
+    if inp_role == '1':   # ping out
+        radio.stopListening()
+        print('Now sending length {} ... '.format(next_payload_size), end="")
+        radio.write(send_payload[:next_payload_size])
+
+        # Now, continue listening
+        radio.startListening()
+
+        started_waiting_at = millis()
+        timeout = False
+        while (not radio.available()) and (not timeout):
+            if (millis() - started_waiting_at) > 500:
+                timeout = True
+        if timeout:
+            print('failed, response timed out.')
+        else:
+            len = radio.getDynamicPayloadSize()
+            receive_payload = radio.read(len)
+            print('got response size={} value="{}"'.format(len, receive_payload.decode('utf-8')))
+        next_payload_size += payload_size_increments_by
+        if next_payload_size > max_payload_size:
+            next_payload_size = min_payload_size
+        time.sleep(0.1)
+    else:
+        if irq_gpio_pin is None:
+            try_read_data()
+        else:
+            time.sleep(1000)

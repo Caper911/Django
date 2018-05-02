@@ -19,23 +19,23 @@ layui.define(function(exports){
       date.shift();
       data1.shift();
       data2.shift();
-      date.push('06:11');
+      date.push('17:00');
       data1.push(dataone);
-      data2.push(datatwo)
-
+      data2.push(datatwo);
 
       echartsApp[0].setOption({
         xAxis: {
             data: date
         },
         series : [{
-          name:'PV',
+          name:'下载速度',
           data: data1
         },{
-          name:'UV',
+          name:'上传速度',
           data: data2
         }]
     });
+    
     }
   };
 
@@ -56,7 +56,7 @@ layui.define(function(exports){
         //今日流量趋势
         {
           title: {
-            text: '今日流量趋势',
+            text: '实时上传/下载速度',
             x: 'center',
             textStyle: {
               fontSize: 14
@@ -74,18 +74,20 @@ layui.define(function(exports){
             data: date
           }],
           yAxis : [{
-            type : 'value',
-            min:0,
-            max:5000
+            type: 'value',
+            scale: true,
+            name: '速度',
+            max: 500,
+            min: 0,
           }],
           series : [{
-            name:'PV',
+            name:'下载速度',
             type:'line',
             smooth:true,
             itemStyle: {normal: {areaStyle: {type: 'default'}}},
             data: data1
           },{
-            name:'UV',
+            name:'上传速度',
             type:'line',
             smooth:true,
             itemStyle: {normal: {areaStyle: {type: 'default'}}},
@@ -154,10 +156,11 @@ layui.define(function(exports){
       ]
       ,elemDataView = $('#LAY-index-dataview').children('div')
       ,renderDataView = function(index){
+
         echartsApp[index] = echarts.init(elemDataView[index], layui.echartsTheme);
         
         echartsApp[index].setOption(options[index]);
-  
+  	
         window.onresize = echartsApp[index].resize;
       };
       

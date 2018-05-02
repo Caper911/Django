@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['23.105.197.30','localhost','127.0.0.1','192.168.123.134']
 # Application definition
 
 INSTALLED_APPS = [
+    'django_crontab',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -139,7 +140,7 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+#USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
@@ -168,3 +169,17 @@ REST_FRAMEWORK = {
 # 过期时间
 REST_FRAMEWORK_TOKEN_EXPIRE_MINUTES = 60
 
+# 定时任务
+CRONJOBS = [
+    ('0 */1 * * * ?', 'bearing.cron.test','> /home/caper911/test.log')
+]
+
+#以上都完成后，需要执行 
+#python manage.py crontab add 
+#将任务添加并生效
+#
+#显示当前的定时任务 
+#python manage.py crontab show
+#
+#删除所有定时任务 
+#python manage.py crontab remove

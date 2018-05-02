@@ -114,16 +114,21 @@
                   <a href="javascript:;">实时数据</a>
                   <dl class="layui-nav-child">
                     <dd data-name="list">
-                      <a lay-href="/all/">树莓派实时数据</a>
+                      <a lay-href="/envriDashboard/">车间环境实时数据</a>
                     </dd>
-
+                    <dd data-name="list">
+                      <a lay-href="/raspiDashboard/">树莓派运行数据</a>
+                    </dd>
                   </dl>
                 </dd>
                 <dd data-name="grid">
                   <a href="javascript:;">历史数据</a>
                   <dl class="layui-nav-child">
                     <dd data-name="grid">
-                      <a lay-href="javascript:;">树莓派历史数据</a>
+                      <a lay-href="javascript:;">车间环境数据</a>
+                    </dd>
+                    <dd data-name="grid">
+                      <a lay-href="javascript:;">树莓派运行数据</a>
                     </dd>
 
                   </dl>
@@ -147,6 +152,25 @@
                 </dd>
               </dl>
             </li>
+            <li data-name="component" class="layui-nav-item">
+                <a href="javascript:;" lay-tips="组件" lay-direction="2">
+                  <i class="layui-icon layui-icon-app"></i>
+                  <cite>数据统计分析</cite>
+                </a>
+                <dl class="layui-nav-child">
+                  <dd data-name="grid">
+                    <a lay-href="/analysisData">热力图</a>
+
+                  </dd>
+                  <dd data-name="grid">
+                    <a lay-href="/MaxMinData">峰值分布</a>
+                    
+                  </dd>
+                  <dd data-name="grid">
+                    <a lay-href="/Workheatmap">车间动态热力图</a>
+                  </dd>
+                </dl>
+              </li>
             <li data-name="app" class="layui-nav-item">
               <a href="javascript:;" lay-tips="应用" lay-direction="2">
                 <i class="layui-icon layui-icon-app"></i>
@@ -170,6 +194,25 @@
                 </dd>
                 <dd data-name="grid">
                   <a lay-href="/map/" onclick="layer.tips('各工厂地理分布', this);">MES地理位置分布</a>
+                </dd>
+              </dl>
+            </li>
+            <li data-name="component" class="layui-nav-item">
+              <a href="javascript:;" lay-tips="组件" lay-direction="2">
+                <i class="layui-icon layui-icon-component"></i>
+                <cite>管理中心</cite>
+              </a>
+              <dl class="layui-nav-child">
+                <dd data-name="grid">
+                  <a lay-href="/ManageRasp">树莓派管理</a>
+
+                </dd>
+                <dd data-name="grid">
+                  <a lay-href="javascript:;">车间管理</a>
+                  
+                </dd>
+                <dd data-name="grid">
+                  <a lay-href="/ManageFactory">工厂管理</a>
                 </dd>
               </dl>
             </li>
@@ -202,7 +245,6 @@
                     <dd>
                       <a lay-href="setSystemWebsite">网站设置</a>
                     </dd>
-                    <
                     <dd>
                       <a lay-href="setSystemEmail">邮件服务</a>
                     </dd>
@@ -219,6 +261,9 @@
                     </dd>
                     <dd>
                       <a lay-href="/raspiDashboard/">测试标签</a>
+                    </dd>
+                    <dd>
+                      <a lay-href="/envriDashboard/">测试标签2</a>
                     </dd>
                   </dl>
                 </dd>
