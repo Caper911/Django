@@ -12,8 +12,11 @@
 
   <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/layui.css' %}" media="all">
   <link rel="stylesheet" href="{% static 'layuiadmin/style/admin.css' %}" media="all">
+
   <script src="{% static '/jquery-3.3.1.min.js' %}"></script>
-  <script src="{% static 'highcharts/code/highcharts.js' %}"></script>
+  <script src="{% static 'highcharts/code/highstock.js' %}"></script>
+  <script src="{% static 'highcharts/code/modules/exporting.js' %}"></script>
+  <script src="{% static 'highcharts/highcharts-zh_CN.src.js' %}"></script>
 
 </head>
 
@@ -23,94 +26,27 @@
     <div class="layui-row layui-col-space15">
       <div class="layui-col-md12">
         <div class="layui-row layui-col-space15">
-
           <div class="layui-col-md12">
             <div class="layui-card">
-              <div class="layui-card-header">车间信息</div>
+              <div class="layui-card-header">温度历史数据</div>
               <div class="layui-card-body">
-
-                <div class="layui-carousel layadmin-carousel layadmin-news">
-                  <div carousel-item>
-                    <ul class="layui-row layui-col-space10">
-
-                      <li class="layui-col-xs3">
-                        <a href="javascript:;" class="layadmin-backlog-body">
-                          <p>
-                            <cite id='date' lay-tips="车间时间">1990-1-01 00:00:00</cite>
-                          </p>
-                        </a>
-                      </li>
-
-                      <li class="layui-col-xs1">
-                        <a href="javascript:;" class="layadmin-backlog-body">
-                          <p>
-                            <cite id='date' lay-tips="负责人">张三</cite>
-                          </p>
-                        </a>
-                      </li>
-
-                      <li class="layui-col-xs1 layui-col-md-offset3">
-                        <a href="javascript:;" class="layadmin-backlog-body">
-                          <p>
-                            <button onclick="WebSocketTest();" id="button" lay-tips="服务器连接状态" class="layui-btn layui-btn-danger layui-circle">未连接</button>
-                          </p>
-                        </a>
-                      </li>
-                      <li class="layui-col-xs1 layui-col-md-offset2">
-                        <a href="javascript:;" class="layadmin-backlog-body">
-                          <p>
-                            <button onclick="" id="conButton" lay-tips="可燃气体浓度警报" class="layui-btn layui-btn-green">警报</button>
-                          </p>
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
+                <div id="container"></div>
               </div>
             </div>
           </div>
-
-          <div class="layui-col-md6">
-            <div class="layui-card">
-              <div class="layui-card-header">实时温度</div>
-              <div class="layui-card-body">
-                <div class="layui-carousel layadmin-carousel layadmin-dataview" data-anim="fade" lay-filter="LAY-index-dataview1">
-                  <div carousel-item id="LAY-index-dataview1">
-                    <div id="container1"></div>
-                    <div></div>
-                    <div></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="layui-col-md6">
-            <div class="layui-card">
-              <div class="layui-card-header">实时湿度</div>
-              <div class="layui-card-body">
-                <div class="layui-carousel layadmin-carousel layadmin-dataview" data-anim="fade" lay-filter="LAY-index-dataview2">
-                  <div carousel-item id="LAY-index-dataview2">
-                    <div id="container2"></div>
-                    <div></div>
-                    <div></div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           <div class="layui-col-md12">
             <div class="layui-card">
-              <div class="layui-card-header">实时可燃气体浓度</div>
+              <div class="layui-card-header">湿度历史数据</div>
               <div class="layui-card-body">
-                <div class="layui-carousel layadmin-carousel layadmin-dataview" data-anim="fade" lay-filter="LAY-index-dataview3">
-                  <div carousel-item id="LAY-index-dataview3">
-                    <div id="container3"></div>
-                    <div></div>
-                    <div></div>
-                  </div>
-                </div>
+                <div id="container1"></div>
+              </div>
+            </div>
+          </div>
+          <div class="layui-col-md12">
+            <div class="layui-card">
+              <div class="layui-card-header">可燃气体历史数据</div>
+              <div class="layui-card-body">
+                <div id="container2"></div>
               </div>
             </div>
           </div>
@@ -118,6 +54,7 @@
       </div>
     </div>
   </div>
+
 
   <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
   <script src="{% static 'layuiadmin/modules/laybind.js' %}"></script>
@@ -132,57 +69,9 @@
       index: 'lib/index' //主入口模块
     }).use(['index', 'console', 'laytpl', 'element', 'layer', 'sensordata'], function () {
       element = layui.element;
-
-      WebSocketTest()
     });
 
   </script>
-
-  <script>         
-    function WebSocketTest(){
-      if ("WebSocket" in window) {
-        layer.msg('服务器连接成功！');
-
-        // 打开一个 web socket
-        var ws = new WebSocket("ws://127.0.0.1:8000/socket/sentTemHumSmogSocket");
-
-        ws.onmessage = function (evt) {
-          var received_msg = evt.data;
-
-          var obj = JSON.parse(evt.data);
-          console.log(obj);
-          var x = (new Date()).getTime(); // current time
-          $('#button').html("已连接");
-          $('#button').attr("class", "layui-btn")
-          $('#date').html(obj.datetime);
-          if(obj.concentration>=200){
-            $('#conButton').attr("class", "layui-btn layui-btn-danger");
-          }
-          else{
-            $('#conButton').attr("class", "layui-btn layui-btn-green");
-          }
-          series1.addPoint([x, parseInt(obj.temperature)], true, true);
-          series2.addPoint([x, parseInt(obj.humidity)], true, true);
-          series3.addPoint([x, parseInt(obj.concentration)], true, true);
-        };
-
-        ws.onclose = function(){
-          // 关闭 websocket
-          layer.msg('连接已断开！');
-          $('#button').html("已断开");
-          $('#button').attr("class", "layui-btn layui-btn-danger");
-        };
-      }
-
-      else {
-        // 浏览器不支持 WebSocket
-        layer.msg('连接已断开！');
-        $('#button').html("已断开");
-        $('#button').attr("class", "layui-btn layui-btn-danger");
-      }
-    }
-  </script>
-
   <script>
     Date.prototype.format = function (fmt) {
       var o = {
@@ -206,251 +95,230 @@
     }        
   </script>
   <script>
-    function addData() {
-      // generate an array of random data
-      var data = [],
-        time = (new Date()).getTime(),
-        i;
-      for (i = -59; i <= 0; i += 1) {
-        data.push({
-          x: time + i * 1000,
-          y: 0
+    Highcharts.setOptions({ global: { useUTC: true } });   
+    $(function () {
+      $.getJSON('/api/getSensorHisData', function (data) {
+        // Create a timer
+        var start = +new Date();
+        // Create the chart
+
+        $('#container').highcharts('StockChart', {
+          chart: {
+            events: {
+              load: function () {
+                if (!window.isComparing) {
+                  this.setTitle(null, {
+                    text: 'Built chart in ' + (new Date() - start) + 'ms'
+                  });
+                }
+              }
+            },
+            zoomType: 'x'
+          },
+          tooltip: {
+            split: false,
+            shared: true,
+          },
+          rangeSelector: {
+            buttons: [{
+              type: 'day',
+              count: 3,
+              text: '3天'
+            }, {
+              type: 'week',
+              count: 1,
+              text: '1周'
+            }, {
+              type: 'month',
+              count: 1,
+              text: '1个月'
+            }, {
+              type: 'month',
+              count: 6,
+              text: '6个月'
+            }, {
+              type: 'year',
+              count: 1,
+              text: '1年'
+            }, {
+              type: 'all',
+              text: '所有'
+            }],
+            selected: 3
+          },
+          yAxis: {
+            title: {
+              text: 'Temperature (°C)'
+            }
+          },
+          title: {
+            text: '从运行到现在 每小时平均气温'
+          },
+          subtitle: {
+            text: 'Built chart in ...' // dummy text to reserve space for dynamic subtitle
+          },
+          series: [{
+            name: 'Temperature',
+            data: data.data.Tem,
+            pointStart: data.pointStart,
+            pointInterval: data.pointInterval,
+            tooltip: {
+              valueDecimals: 1,
+              valueSuffix: '°C'
+            }
+          }]
         });
-      }
-      return data;
-    };
 
-    Highcharts.setOptions({
-      global: {
-        useUTC: false
-      }
-    });
-    function activeLastPointToolip(chart) {
-      var points = chart.series[0].points;
-      chart.tooltip.refresh(points[points.length - 1]);
-    }
-
-    $('#container1').highcharts({
-      chart: {
-        type: 'spline',
-        animation: Highcharts.svg, // don't animate in old IE
-        marginRight: 10,
-        events: {
-          load: function () {
-            // set up the updating of the chart each second
-            series1 = this.series[0],
-              chart = this;
-
-          }
-        }
-      },
-      title: {
-        text: '车间实时气温'
-      },
-
-      subtitle: {
-        text: '数据来源: 树莓派'
-      },
-      xAxis: {
-        type: 'datetime',
-        tickPixelInterval: 150
-      },
-      yAxis: {
-        title: {
-          text: '气温 (°C)'
-        },
-        tickPositions: [0, 10, 20, 30, 40 ,50]
-        ,
-        plotLines: [{
-          value: 0,
-          width: 1,
-          color: '#808080'
-        }]
-      },
-      tooltip: {
-        formatter: function () {
-          return '<b>' + this.series.name + '</b><br/>' +
-            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
-            Highcharts.numberFormat(this.y, 1);
-        }
-      },
-      legend: {
-        enabled: true
-      },
-      exporting: {
-        enabled: false
-      },
-      plotOptions: {
-        series: {
-          marker: {
-            enabled: false
-          }
-        },
-        line: {
-          dataLabels: {
-            enabled: true          // 开启数据标签
+        $('#container1').highcharts('StockChart', {
+          chart: {
+            events: {
+              load: function () {
+                if (!window.isComparing) {
+                  this.setTitle(null, {
+                    text: '图表生成 ' + (new Date() - start) + 'ms'
+                  });
+                }
+              }
+            },
+            zoomType: 'x'
           },
-          enableMouseTracking: false // 关闭鼠标跟踪，对应的提示框、点击事件会失效
-        }
-      },
-      series: [{
-        lineColor: Highcharts.getOptions().colors[1],
-        color: Highcharts.getOptions().colors[3],
-        name: '温度',
-        data: addData()
-      }]
-    }, function (c) {
-      activeLastPointToolip(c)
-    });
-
-
-    $('#container2').highcharts({
-      chart: {
-        type: 'spline',
-        animation: Highcharts.svg, // don't animate in old IE
-        marginRight: 10,
-        events: {
-          load: function () {
-            // set up the updating of the chart each second
-            series2 = this.series[0],
-              chart = this;
-
-          }
-        }
-      },
-      title: {
-        text: '车间实时湿度'
-      },
-
-      subtitle: {
-        text: '数据来源: 树莓派'
-      },
-      xAxis: {
-        type: 'datetime',
-        tickPixelInterval: 150
-      },
-      yAxis: {
-        title: {
-          text: '湿度(%)'
-        },
-        tickPositions: [0, 20, 40, 60, 80 ,100]
-        ,
-        plotLines: [{
-          value: 0,
-          width: 1,
-          color: '#808080'
-        }]
-      },
-      tooltip: {
-        formatter: function () {
-          return '<b>' + this.series.name + '</b><br/>' +
-            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
-            Highcharts.numberFormat(this.y, 1);
-        }
-      },
-      legend: {
-        enabled: true
-      },
-      exporting: {
-        enabled: false
-      },
-      plotOptions: {
-        series: {
-          marker: {
-            enabled: false
-          }
-        },
-        line: {
-          dataLabels: {
-            enabled: true          // 开启数据标签
+          tooltip: {
+            split: false,
+            shared: true,
           },
-          enableMouseTracking: false // 关闭鼠标跟踪，对应的提示框、点击事件会失效
-        }
-      },
-      series: [{
-        lineColor: Highcharts.getOptions().colors[1],
-        color: Highcharts.getOptions().colors[3],
-        name: '湿度',
-        data: addData()
-      }]
-    }, function (c) {
-      activeLastPointToolip(c)
-    });
-
-
-    $('#container3').highcharts({
-      chart: {
-        type: 'spline',
-        animation: Highcharts.svg, // don't animate in old IE
-        marginRight: 10,
-        events: {
-          load: function () {
-            // set up the updating of the chart each second
-            series3 = this.series[0],
-              chart = this;
-
-          }
-        }
-      },
-      title: {
-        text: '车间实时可燃气体浓度'
-      },
-
-      subtitle: {
-        text: '数据来源: 树莓派'
-      },
-      xAxis: {
-        type: 'datetime',
-        tickPixelInterval: 150
-      },
-      yAxis: {
-        title: {
-          text: '气体浓度 (ppm)'
-        },
-        tickPositions: [0, 80, 150, 250, 400 ,600]
-        ,
-        plotLines: [{
-          value: 0,
-          width: 1,
-          color: '#808080'
-        }]
-      },
-      tooltip: {
-        formatter: function () {
-          return '<b>' + this.series.name + '</b><br/>' +
-            Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
-            Highcharts.numberFormat(this.y, 1);
-        }
-      },
-      legend: {
-        enabled: true
-      },
-      exporting: {
-        enabled: false
-      },
-      plotOptions: {
-        series: {
-          marker: {
-            enabled: false
-          }
-        },
-        line: {
-          dataLabels: {
-            enabled: true          // 开启数据标签
+          rangeSelector: {
+            buttons: [{
+              type: 'day',
+              count: 3,
+              text: '3天'
+            }, {
+              type: 'week',
+              count: 1,
+              text: '1周'
+            }, {
+              type: 'month',
+              count: 1,
+              text: '1个月'
+            }, {
+              type: 'month',
+              count: 6,
+              text: '6个月'
+            }, {
+              type: 'year',
+              count: 1,
+              text: '1年'
+            }, {
+              type: 'all',
+              text: '所有'
+            }],
+            selected: 3
           },
-          enableMouseTracking: false // 关闭鼠标跟踪，对应的提示框、点击事件会失效
-        }
-      },
-      series: [{
-        lineColor: Highcharts.getOptions().colors[1],
-        color: Highcharts.getOptions().colors[3],
-        name: '可燃气体浓度',
-        data: addData()
-      }]
-    }, function (c) {
-      activeLastPointToolip(c)
+          yAxis: {
+            title: {
+              text: 'Humidity (%)'
+            }
+          },
+          title: {
+            text: '从运行到现在 每小时平均湿度'
+          },
+          subtitle: {
+            text: '图表生成时间 ...' // dummy text to reserve space for dynamic subtitle
+          },
+          series: [{
+            name: 'Humidity',
+            data: data.data.Hum,
+            pointStart: data.pointStart,
+            pointInterval: data.pointInterval,
+            tooltip: {
+              valueDecimals: 1,
+              valueSuffix: '%'
+            }
+          }]
+        });
+        
+        $('#container2').highcharts('StockChart', {
+          chart: {
+            events: {
+              load: function () {
+                if (!window.isComparing) {
+                  this.setTitle(null, {
+                    text: 'Built chart in ' + (new Date() - start) + 'ms'
+                  });
+                }
+              }
+            },
+            zoomType: 'x'
+          },
+          tooltip: {
+            split: false,
+            shared: true,
+          },
+          rangeSelector: {
+            buttons: [{
+              type: 'day',
+              count: 3,
+              text: '3天'
+            }, {
+              type: 'week',
+              count: 1,
+              text: '1周'
+            }, {
+              type: 'month',
+              count: 1,
+              text: '1个月'
+            }, {
+              type: 'month',
+              count: 6,
+              text: '6个月'
+            }, {
+              type: 'year',
+              count: 1,
+              text: '1年'
+            }, {
+              type: 'all',
+              text: '所有'
+            }],
+            selected: 3
+          },
+          yAxis: {
+            title: {
+              text: 'Concentration (ppm)'
+            }
+          },
+          title: {
+            text: '从运行到现在 每小时平均可燃气体浓度'
+          },
+          subtitle: {
+            text: 'Built chart in ...' // dummy text to reserve space for dynamic subtitle
+          },
+          series: [{
+            name: 'Concentration ',
+            data: data.data.Con,
+            pointStart: data.pointStart,
+            pointInterval: data.pointInterval,
+            tooltip: {
+              valueDecimals: 1,
+              valueSuffix: 'ppm'
+            }
+          }]
+        });
+      });
     });
 
+  </script>
+
+  <script>
+
+
+
+    $(function () {
+      $.getJSON('https://data.jianshukeji.com/jsonp?filename=json/large-dataset.json&callback=?', function (data) {
+        // Create a timer
+        var start = +new Date();
+        // Create the chart
+       
+      });
+    });
   </script>
 </body>
 

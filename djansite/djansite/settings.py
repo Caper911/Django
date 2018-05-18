@@ -183,3 +183,13 @@ CRONJOBS = [
 #
 #删除所有定时任务 
 #python manage.py crontab remove
+
+
+EMAIL_HOST = 'smtp.qq.com'                   #SMTP地址
+EMAIL_PORT = 465                                 #SMTP端口
+EMAIL_HOST_USER = '185104828@qq.com'       #我自己的邮箱
+EMAIL_HOST_PASSWORD = 'yazi520+-.'                  #我的邮箱密码
+EMAIL_SUBJECT_PREFIX = u'[数据采集平台]'            #为邮件Subject-line前缀,默认是'[django]'
+EMAIL_USE_SSL = True                             #与SMTP服务器通信时，是否启动TLS链接(安全链接)。默认是false
+#管理员站点
+SERVER_EMAIL = 'someonelikeyou911@live.com'  

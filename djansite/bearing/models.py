@@ -117,13 +117,20 @@ class sensorWaveletData(models.Model):
     
 
 class TemHumConData(models.Model):
+    class Meta:
+        verbose_name = '车间环境传感器数据'
+        verbose_name_plural = '车间环境传感器数据' 
     TemValue = models.FloatField('温度传感器数据')
     HumValue = models.FloatField('湿度传感器数据')
     ConValue = models.FloatField('可燃气体浓度')
     saveDate = models.DateTimeField('保存日期',default = timezone.now)
-
+    def __str__(self):
+        return str(self.TemValue)+'-'+str(self.HumValue) +'-'+ str(self.ConValue)
 
 class RaspbianInfo(models.Model):
+    class Meta:
+        verbose_name = '上位机信息'
+        verbose_name_plural = '上位机信息' 
     RaspID = models.AutoField('上位机ID',primary_key=True)
     RaspDes = models.CharField('上位机描述',max_length=100)
     saveDate = models.DateTimeField('保存日期',default = timezone.now)
@@ -132,7 +139,41 @@ class RaspbianInfo(models.Model):
     #is_avtive = models.BooleanField(default=False)
     productDepart = models.ForeignKey(productDepart,on_delete=models.CASCADE,)
     
-    
+class Sensor(models.Model):
+    class Meta:
+        verbose_name = '传感器信息'
+        verbose_name_plural = '传感器信息'
+    SensorID = models.AutoField('传感器ID',primary_key=True)
+    SensorDes = models.CharField('传感器描述',max_length=100)
+    SensorKey = models.CharField('传感器编号',max_length=64)
+    Type = (  
+         ('0', u'数值型传感器'),  
+         ('1', u'开关型传感器'),  
+         ('2', u'泛型传感器'),  
+         ('-1', u'请选择类型'),
+    )  
+    SensorType = models.CharField('传感器类型', max_length=2,choices=Type,default = -1,null=True)
+
+    Unit = models.CharField('数值单位',max_length=20)
+    otherInfo = models.TextField('备注 ',null=True,blank=True)
+    is_active = models.BooleanField('是否有效',default=False)
+    productDepart = models.ForeignKey(productDepart,on_delete=models.CASCADE,default = None)
+    saveDate = models.DateTimeField('保存日期',default = timezone.now)
+    modDate = models.DateTimeField('最后修改日期', auto_now = True)
+
+class Version(models.Model):
+    class Meta:
+        verbose_name = '版本更新信息'
+        verbose_name_plural = '版本更新信息' 
+        ordering = ['-saveDate']
+    VersionID = models.AutoField('版本ID',primary_key=True)
+    Version = models.CharField('版本号',max_length=100)
+    VersionContent  = models.TextField('版本更新内容 ',null=True,blank=True)
+    UpdatePerson = models.CharField('更新人',max_length=12)
+    saveDate = models.DateTimeField('保存日期',default = timezone.now)
+    def __str__(self):
+        return str(self.Version)+'-'+str(self.UpdatePerson)
+
 class cpuInfo(models.Model):
     value = models.FloatField()
     time = models.DateTimeField()

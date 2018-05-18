@@ -56,7 +56,8 @@
       </div>
 
       <div class="layui-col-xs12 layui-col-sm12 layui-col-md2 layui-col-md-offset1">
-        <a href="/getWaveletDataToCsv/" class="layui-btn" target="_blank">数据导出</a>
+        <a id="button" class="layui-btn" target="_blank">数据导出</a>
+        
       </div>
       <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
         <!-- 填充内容 -->
@@ -195,7 +196,7 @@
         url += sensorID.value;
         url += "&runtime=";
         url += datetime;
-
+        $("#button").attr("href","/getWaveletDataToCsv/?sensor_id="+sensorID.value+"&runtime="+datetime); 
         $.ajax({
           type: "GET",
           url: url,
@@ -252,6 +253,11 @@
 
       });
     });
+
+
+    function openDownload(){  
+     window.open("/getWaveletDataToCsv/");  
+    }  
   </script>
 
   <script>

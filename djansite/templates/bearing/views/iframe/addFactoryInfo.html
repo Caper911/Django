@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"> {% load staticfiles %}
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>添加上位机信息</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+
+  <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/layui.css' %}" media="all">
+  <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/modules/layer/default/layer.css' %}" media="all">
+  <link rel="stylesheet" href="{% static 'layuiadmin/style/admin.css' %}" media="all">
+
+  <script src="{% static 'jquery-3.2.1.min.js' %}"></script>
+  <script src="{% static 'highcharts/code/highstock.js' %}"></script>
+
+  <script src="{% static 'highcharts/code/modules/exporting.js' %}"></script>
+  <script src="{% static 'highcharts/code/modules/boost.js' %}"></script>
+</head>
+
+<body>
+
+  <style>
+    /* 这段样式只是用于演示 */
+
+    #LAY-component-grid-all .layui-card-body {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      height: 200px;
+    }
+  </style>
+
+  <div class="layui-fluid" id="LAY-component-grid-all" style="overflow:visible">
+    <div class="layui-row layui-col-space10">
+      <div style="margin-left: 1px">
+        <div class="layui-container">
+          <div class="layui-col-xs12 layui-col-sm12 layui-col-md12">
+            <form class="layui-form" action="" name="formname">
+              <div class="layui-form-item">
+                <label class="layui-form-label">制造工厂ID</label>
+                <div class="layui-input-block">
+                  <input id="RaspID" type="text" name="factorID" lay-verify="title" autocomplete="on" placeholder="" class="layui-input" disabled>
+                </div>
+              </div>
+              <div class="layui-form-item">
+                <label class="layui-form-label">工厂描述</label>
+                <div class="layui-input-block">
+                  <input type="text" name="factorDes" lay-verify="required" placeholder="请输入工厂描述" autocomplete="off" class="layui-input">
+                </div>
+              </div>
+
+              <div class="layui-form-item">
+                <label class="layui-form-label">地址</label>
+                <div class="layui-input-block">
+                  <input type="text" name="location" lay-verify="required" placeholder="请输入地址" autocomplete="off" class="layui-input">
+                </div>
+              </div>
+              <div class="layui-form-item">
+                <label class="layui-form-label">负责人</label>
+                <div class="layui-input-block">
+                  <input type="text" name="personInCharge" lay-verify="required" placeholder="请输入姓名" autocomplete="off" class="layui-input">
+                </div>
+              </div>
+              <div class="layui-form-item">
+                  <label class="layui-form-label">联系电话</label>
+                  <div class="layui-input-block">
+                    <input type="text" name="phoneNumber" lay-verify="required" placeholder="请输入联系电话" autocomplete="off" class="layui-input">
+                  </div>
+                </div>
+
+              <div class="layui-form-item">
+                <label class="layui-form-label">备注</label>
+                <div class="layui-input-block">
+                  <input type="text" name="otherInfo" lay-verify="required" placeholder="请输入备注信息" autocomplete="off" class="layui-input">
+                </div>
+              </div>
+
+              <button class="layui-btn" lay-submit="" lay-filter="demo1" id="addData" style="display:none;">立即提交</button>
+            </form>
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
+
+  <script>
+    layui.config({
+      base: "{% static 'layuiadmin/' %}" //静态资源所在路径
+    }).extend({
+      index: 'lib/index' //主入口模块
+    }).use(['index']);
+
+  </script>
+
+
+  <script>
+
+
+    function loadFactoryID(form) {
+      $.ajax({
+        type: 'POST',
+        url: '/api/getLastIDInFactoryInfo',
+        success: function (data) {
+          $("#RaspID").empty();
+          $("#RaspID").val(data.data.ID);
+          form.render();
+          if (data.code == 500) {
+            parent.layer.msg(data.msg);
+          }
+        }
+      })
+    }
+
+  </script>
+
+  <script>
+
+    layui.use('form', function () {
+      var form = layui.form;
+      loadFactoryID(form);
+
+      form.on('submit(demo1)', function (data) {
+
+        //data.field
+
+        $.ajax({
+          type: "POST",
+          url: "/api/addFactoryInfo",//url
+          data: data.field,
+          success: function (result) {
+            console.log(result);//打印服务端返回的数据(调试用)
+            if (result.code == 200) {
+              parent.layer.msg(result.msg)
+              var index = parent.layer.getFrameIndex(window.name);  //获取窗口索引
+              //关闭iframe
+              parent.layer.close(index);
+            }
+            if (result.code == 500) {
+              parent.layer.msg(result.msg)
+            }
+          }
+        });
+
+        return false;
+      });
+    });
+
+  </script>
+
+</body>
+
+</html>

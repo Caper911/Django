@@ -1,144 +1,71 @@
-
-
 <!DOCTYPE html>
+
 <html>
+
 <head>
-  <meta charset="utf-8">
-  {% load staticfiles %}
+  <meta charset="utf-8"> {% load staticfiles %}
   <title>工控平台中心 - Admin </title>
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
   <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/layui.css' %}" media="all">
   <link rel="stylesheet" href="{% static 'layuiadmin/style/admin.css' %}" media="all">
+
+  <script src="{% static 'jquery-3.2.1.min.js' %}"></script>
 </head>
+
 <body>
-  
+
   <div class="layui-fluid">
     <div class="layui-row layui-col-space15">
 
       <div class="layui-col-md12">
-	
-        <div class="layui-row layui-col-space15">
- 
-          <div class="layui-col-md12">
-    <div class="layui-card">
-	<div class="layui-card-header">版本更新线</div>
-         <div class="layui-card-body">
-      <ul class="layui-timeline">
-        <li class="layui-timeline-item">
-          <i class="layui-icon layui-timeline-axis"></i>
-          <div class="layui-timeline-content layui-text">
-            <h3 class="layui-timeline-title">V0.2</h3>
-            <p>
-              完成第一版界面设计，确定设计方案及各模块的设计方法。
-              <br>不枉近百个日日夜夜与之为伴。因小而大，因弱而强。
-              <br>无论它能走多远，抑或如何支撑？至少我曾倾注全心，无怨无悔 <i class="layui-icon"></i>
-            </p>
-          </div>
-        </li>
-        <li class="layui-timeline-item">
-          <i class="layui-icon layui-timeline-axis"></i>
-          <div class="layui-timeline-content layui-text">
-            <h3 class="layui-timeline-title">V0.1</h3>
-            <p>
-              毕业设计课题确定，开始准备设计方案。
-              <br>不枉近百个日日夜夜与之为伴。因小而大，因弱而强。
-              <br>无论它能走多远，抑或如何支撑？至少我曾倾注全心，无怨无悔 <i class="layui-icon"></i>
-            </p>
-          </div>
-        </li>
-        <li class="layui-timeline-item">
-          <i class="layui-icon layui-timeline-axis"></i>
-          <div class="layui-timeline-content layui-text">
-            <h3 class="layui-timeline-title">8月15日</h3>
-            <p>
-              中国人民抗日战争胜利日
-              <br>常常在想，尽管对这个国家有这样那样的抱怨，但我们的确生在了最好的时代
-              <br>铭记、感恩
-              <br>所有为中华民族浴血奋战的英雄将士
-              <br>永垂不朽
-            </p>
-          </div>
-        </li>
-      </ul>  
-        </div>
-          </div>
-         </div>
 
-          <div class="layui-col-md6">
+        <div class="layui-row layui-col-space15">
+
+
+          <div class="layui-col-md8">
             <div class="layui-card">
-              <div class="layui-card-header">待办事项</div>
+              <div class="layui-card-header layui-bg-cyan">信息统计</div>
               <div class="layui-card-body">
 
                 <div class="layui-carousel layadmin-carousel layadmin-backlog">
                   <div carousel-item>
                     <ul class="layui-row layui-col-space10">
-                      <li class="layui-col-xs6">
-                        <a href="javascript:;" class="layadmin-backlog-body">
-                          <h3>待审评论</h3>
-                          <p><cite>66</cite></p>
+                      <li class="layui-col-xs2">
+                        <a href="javascript:;" class="layadmin-backlog-body layui-bg-red">
+                          <h3>工厂数量</h3>
+                          <p>
+                            <cite style="color: #F0F0F0;">5</cite>
+                          </p>
                         </a>
                       </li>
-                      <li class="layui-col-xs6">
-                        <a href="javascript:;" class="layadmin-backlog-body">
-                          <h3>待审帖子</h3>
-                          <p><cite>12</cite></p>
+                      <li class="layui-col-xs2">
+                        <a href="javascript:;" class="layadmin-backlog-body layui-bg-orange">
+                          <h3>部门数量</h3>
+                          <p>
+                            <cite style="color: #F0F0F0;">5</cite>
+                          </p>
                         </a>
                       </li>
-                      <li class="layui-col-xs6">
-                        <a href="javascript:;" class="layadmin-backlog-body">
-                          <h3>待审商品</h3>
-                          <p><cite>99</cite></p>
+                      <li class="layui-col-xs2">
+                        <a href="javascript:;" class="layadmin-backlog-body layui-bg-blue">
+                          <h3>机床数量</h3>
+                          <p>
+                            <cite style="color: #F0F0F0;">6</cite>
+                          </p>
                         </a>
                       </li>
-                      <li class="layui-col-xs6">
-                        <a href="javascript:;" class="layadmin-backlog-body">
-                          <h3>待发货</h3>
-                          <p><cite>20</cite></p>
+
+                      <li class="layui-col-xs2">
+                        <a href="javascript:;" class="layadmin-backlog-body layui-bg-green">
+                          <h3>上位机数量</h3>
+                          <p>
+                            <cite style="color: #F0F0F0;">4</cite>
+                          </p>
                         </a>
                       </li>
                     </ul>
-                    <ul class="layui-row layui-col-space10">
-                      <li class="layui-col-xs6">
-                        <a href="javascript:;" class="layadmin-backlog-body">
-                          <h3>待审友情链接</h3>
-                          <p><cite style="color: #FF5722;">5</cite></p>
-                        </a>
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="layui-col-md12">
-            <div class="layui-card">
-              <div class="layui-card-header">数据概览</div>
-              <div class="layui-card-body">
-                
-                <div class="layui-carousel layadmin-carousel layadmin-dataview" data-anim="fade" lay-filter="LAY-index-dataview">
-                  <div carousel-item id="LAY-index-dataview">
-                    <div><i class="layui-icon layui-icon-loading1 layadmin-loading"></i></div>
-                    <div></div>
-                    <div></div>
-                  </div>
-                </div>
-                
-              </div>
-            </div>
-            <div class="layui-card">
-              <div class="layui-tab layui-tab-brief layadmin-latestData">
-                <ul class="layui-tab-title">
-                  <li class="layui-this">今日热搜</li>
-                  <li>今日热帖</li>
-                </ul>
-                <div class="layui-tab-content">
-                  <div class="layui-tab-item layui-show">
-                    <table id="LAY-index-topSearch"></table>
-                  </div>
-                  <div class="layui-tab-item">
-                    <table id="LAY-index-topCard"></table>
                   </div>
                 </div>
               </div>
@@ -146,51 +73,20 @@
           </div>
         </div>
       </div>
-      
-      <div class="layui-col-md12">
-        
-        <div class="layui-card">
-          <div class="layui-card-header">效果报告</div>
-          <div class="layui-card-body layadmin-takerates">
-            <div class="layui-progress" lay-showPercent="yes">
-              <h3>转化率（日同比 28% <span class="layui-edge layui-edge-top" lay-tips="增长" lay-offset="-15"></span>）</h3>
-              <div class="layui-progress-bar" lay-percent="65%"></div>
-            </div>
-            <div class="layui-progress" lay-showPercent="yes">
-              <h3>签到率（日同比 11% <span class="layui-edge layui-edge-bottom" lay-tips="下降" lay-offset="-15"></span>）</h3>
-              <div class="layui-progress-bar" lay-percent="32%"></div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="layui-card">
-          <div class="layui-card-header">实时监控</div>
-          <div class="layui-card-body layadmin-takerates">
-            <div class="layui-progress" lay-showPercent="yes">
-              <h3>CPU使用率</h3>
-              <div class="layui-progress-bar" lay-percent="58%"></div>
-            </div>
-            <div class="layui-progress" lay-showPercent="yes">
-              <h3>内存占用率</h3>
-              <div class="layui-progress-bar layui-bg-red" lay-percent="90%"></div>
-            </div>
-          </div>
-        </div>
-        
-      </div>
-      
+
     </div>
   </div>
 
 
-  <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>  
+  <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
   <script>
-  layui.config({
-    base: "{% static 'layuiadmin/' %}" //静态资源所在路径
-  }).extend({
-    index: 'lib/index' //主入口模块
-  }).use(['index', 'console']);
+    layui.config({
+      base: "{% static 'layuiadmin/' %}" //静态资源所在路径
+    }).extend({
+      index: 'lib/index' //主入口模块
+    }).use(['index', 'console']);
   </script>
-</body>
-</html>
 
+</body>
+
+</html>

@@ -4,13 +4,16 @@ from bearing.models import cpuInfo,memoryInfo,ioInfo,TemHumConData
 
 from bearing.models import factory,productDepart,machine,sensorInfo,opStartEnddate,machineRunTime
 from bearing.models import sensorRawData,sensorWaveletData
-from bearing.models import RaspbianInfo
+from bearing.models import RaspbianInfo,Version,Sensor
+
 from django.contrib.auth import authenticate,login,logout
 from django.contrib import auth
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+
 from django.http import HttpResponse
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+
 import sys
 import datetime
 import time
@@ -28,8 +31,57 @@ def index(request):
     return render(request,'bearing/views/index.html')
 
 
-def home(request):
+def console(request):
     return render(request,'bearing/views/home/console.html')
+
+###############################################################
+def version(request):
+    AllInfo = Version.objects.all()
+    return render(request,'bearing/views/home/version.html',{'AllInfo': AllInfo})
+
+# ADD A Version INFO
+# 
+
+def addVersionInfo(request):
+    arr = {"code":200,"msg":"版本信息更新成功!","data":{}}
+    
+    if request.method == "POST" and request.POST:
+
+        VersionID = request.POST['VersionID']
+        version = request.POST['Version']
+        VersionContent = request.POST['VersionContent']
+        UpdatePerson = request.POST['UpdatePerson']
+        
+        info = Version.objects.create(VersionID=VersionID,Version=version,VersionContent=VersionContent,UpdatePerson=UpdatePerson)
+        info.save()
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 500
+        arr['msg'] = "请求方式错误，需POST方法"
+        return JsonResponse(arr,safe=False)
+
+# Get last ID IN RaspInfo
+
+def getLastIDInVersion(request):
+    arr = {"code":200,"msg":"获取编号成功！","data":{}}
+    if request.method == "POST":
+        ID = 0
+        info = Version.objects.first()
+        if info is None:
+            ID = 1
+        else:
+            ID = info.VersionID + 1
+            
+        arr['data']['ID'] = ID
+        print(ID)
+           
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 500
+        arr['msg'] = "请求方式错误，需POST方法"
+        return JsonResponse(arr,safe=False)
+    
+    
 
 
 def login(request):
@@ -54,11 +106,30 @@ def componentGridAll(request):
 def appMessage(request):
     return render(request,'bearing/views/app/message/index.html')
 
+############################## iframe
+
 def ChoiceFactory(request):
     return render(request,'bearing/views/iframe/choiceFactory.html')
 
 def addRaspInfoContent(request):
     return render(request,'bearing/views/iframe/addRaspInfo.html')
+
+def addFactoryInfoContent(request):
+    return render(request,'bearing/views/iframe/addFactoryInfo.html')
+
+def addVersionContent(request):
+    return render(request,'bearing/views/iframe/addVersion.html')
+
+def addSensorContent(request):
+    return render(request,'bearing/views/iframe/addSensor.html')
+
+def upLoadData(request):
+    return render(request,'bearing/views/component/grid/UploadData.html')
+
+def upLoadDataFrame(request):
+    return render(request,'bearing/views/iframe/UploadData.html')
+
+#################################################################
 
 def GridWaveletsmooth(request):
     return render(request,'bearing/views/component/grid/waveletSmooth.html')
@@ -66,11 +137,23 @@ def GridWaveletsmooth(request):
 def Map(request):
     return render(request,'bearing/views/map/map.html')
 
+
+####################################################################
+
 def raspiDashboard(request):
     return render(request,'bearing/views/raspi/dashboard.html')
 
 def envriDashboard(request):
     return render(request,'bearing/views/raspi/envridashboard.html')
+
+def HisRaspiDashboard(request):
+    return render(request,'bearing/views/raspi/Hisdashboard.html')
+
+def HisEnvriDashboard(request):
+    return render(request,'bearing/views/raspi/Hisenvridashboard.html')
+
+#####################################################################
+
 
 def testapi(request):
     data = {"code":0,"msg":"","count":1000,"data":[{"id":10000,"username":"user-0","sex":"女","city":"城市-0","sign":"签名-0","experience":255,"logins":24,"wealth":82830700,"classify":"作家","score":57},{"id":10001,"username":"user-1","sex":"男","city":"城市-1","sign":"签名-1","experience":884,"logins":58,"wealth":64928690,"classify":"词人","score":27},{"id":10002,"username":"user-2","sex":"女","city":"城市-2","sign":"签名-2","experience":650,"logins":77,"wealth":6298078,"classify":"酱油","score":31},{"id":10003,"username":"user-3","sex":"女","city":"城市-3","sign":"签名-3","experience":362,"logins":157,"wealth":37117017,"classify":"诗人","score":68},{"id":10004,"username":"user-4","sex":"男","city":"城市-4","sign":"签名-4","experience":807,"logins":51,"wealth":76263262,"classify":"作家","score":6},{"id":10005,"username":"user-5","sex":"女","city":"城市-5","sign":"签名-5","experience":173,"logins":68,"wealth":60344147,"classify":"作家","score":87},{"id":10006,"username":"user-6","sex":"女","city":"城市-6","sign":"签名-6","experience":982,"logins":37,"wealth":57768166,"classify":"作家","score":34},{"id":10007,"username":"user-7","sex":"男","city":"城市-7","sign":"签名-7","experience":727,"logins":150,"wealth":82030578,"classify":"作家","score":28},{"id":10008,"username":"user-8","sex":"男","city":"城市-8","sign":"签名-8","experience":951,"logins":133,"wealth":16503371,"classify":"词人","score":14},{"id":10009,"username":"user-9","sex":"女","city":"城市-9","sign":"签名-9","experience":484,"logins":25,"wealth":86801934,"classify":"词人","score":75}]}
@@ -78,6 +161,12 @@ def testapi(request):
 
 def role(request):
     return render(request,'bearing/views/authority/role.html')
+
+
+
+###########################
+##
+#analysisData
 
 def analysisData(request):
     Temdata = "Date,Time,Temperature\n"
@@ -99,9 +188,16 @@ def analysisData(request):
 def MaxMinData(request):
     return render(request,'bearing/views/analysisData/MaxMin.html')
 
-def Workheatmap(request):
-    return render(request,'bearing/views/analysisData/workheatmap.html')
+def analysis(request):
+    
+    data = getReport()
+    
+    return render(request,'bearing/views/analysisData/analysisData.html',{'data': data})
 
+
+###########################
+##
+#Manage
 
 def ManageFactory(request):
     return render(request,'bearing/views/manage/managefactory.html')
@@ -109,7 +205,13 @@ def ManageFactory(request):
 def ManageRasp(request):
     return render(request,'bearing/views/manage/managerasp.html')
 
+def ManageSensor(request):
+    return render(request,'bearing/views/manage/managesensor.html')
 
+
+###############################################
+##
+#Set User Info
 
 @login_required 
 def setUserInfo(request):
@@ -519,48 +621,6 @@ def sensorLiveData(request):
     return render(request,'bearing/views/sensorData/sensorLiveData.html')
 
 
-#返回测试数据，用于增加图表的数据点
-def ajax_dict(request):
-    ## back type is QuerySet
-    arr = []
-    
-    #allch = locationOne.objects.all()
-    allinfo = testInfo.objects.all()
-    for info in allinfo:
-        arr.append(info.num)
-    
-    return JsonResponse(arr,safe=False)
-
-#
-def get_last_info(info):
-    arr = {}
-    
-    if(info == 'cpu'):
-        cpuinfo = cpuInfo.objects.last()
-        if not cpuinfo is None:    
-            arr = {'value':cpuinfo.value,'time':str(cpuinfo.time.strftime("%Y/%m/%d %H:%M:%S"))}   
-        else:
-            arr = {}
-    elif(info == 'mem'):
-        meminfo = memoryInfo.objects.last()
-        if not meminfo is None:    
-            arr = {'valueUsed':meminfo.valueUsed,'memPercent':meminfo.memPercent,'time':str(meminfo.time.strftime("%Y/%m/%d %H:%M:%S"))}
-        else:
-            arr = {}
-        
-    return arr
-    
-
-def getlast19_info(request):
-    
-    infolist = []
-    allinfo = cpuInfo.objects.order_by('-id')
-    arr = allinfo[1:21]
-    for arrinfo in arr:
-        infolist.append(arrinfo.value)
-        
-    infolist.reverse()
-    return JsonResponse(infolist,safe=False)
 
 
 def getSensorData(request):
@@ -611,13 +671,7 @@ def getCpuInfo_filter(request):
             eacharr = []
     return JsonResponse(arr,safe=False)    
         
-#ajax向服务器发出post请求，返回数据给ajax
-def ajax_dict_realtime(request):
-    
-    info = request.GET.get('info')
-    lastInfo = get_last_info(info)
 
-    return JsonResponse(lastInfo,safe=False) #将接口状态返回给请求者
 
 
 #接受从数据采集节点传送过来的数据，并保存到数据库中
@@ -745,6 +799,7 @@ def getSensor(request):
         arr['msg'] = '错误，请求方式务必为POST!'
         return JsonResponse(arr,safe=False)
  
+#获取机器的运行时间段
 def getMachineRunTime(request):
     arr = {"code":0,"msg":"成功!","data":{}}
     #检测请求的方式是post，并且post请求有数据
@@ -769,7 +824,7 @@ def getMachineRunTime(request):
         arr['msg'] = '错误，请求方式务必为POST!'
         return JsonResponse(arr,safe=False)
     
-
+#通过机器ID来获取机器的运行时间段
 def getOpcodeByMachineID(request):
     
     arr = []
@@ -836,7 +891,7 @@ def getSensorDate(request):
         return JsonResponse(arr,safe=False)
     
     
-#获取数据分析中的日期
+#获取温湿度最大最小值
 import calendar
 def getMinMaxData(request):
     arr = {"code":0,"msg":"成功!","data":{'date':[],'TemVal':{'min':[],'max':[]},'HumVal':{'min':[],'max':[]}}}
@@ -874,7 +929,7 @@ def getMinMaxData(request):
                     arr['data']['TemVal']['max'][info['day']-1] = info['TemMax']
                     arr['data']['HumVal']['min'][info['day']-1] = info['HumMin']
                     arr['data']['HumVal']['max'][info['day']-1] = info['HumMax']
-            print(arr)
+            #print(arr)
         else:
             arr['code'] = 1
             arr['msg'] = '参数错误!'
@@ -942,6 +997,7 @@ def dealWaveletData(request):
         WaveletData = waveletSmooth(data)
         arr = []
         arr.append(data)
+        cache.set( str(sensor_id) +'-' + str(opcode_id) , WaveletData.tolist() ,timeout=3000)
         arr.append(WaveletData.tolist())
         return JsonResponse(arr,safe=False)
     else:
@@ -953,20 +1009,21 @@ def dealWaveletData(request):
 #文件导出函数:将去燥后的数据导出至csv文件
 import csv
  
-# Number of unruly passengers each year 1995 - 2005. In a real application
-# this would likely come from a database or some other back-end data store.
-UNRULY_PASSENGERS = [146,184,235,200,226,251,299,273,281,304,203]
- 
 def getWaveletDataToCsv(request):
   # Create the HttpResponse object with the appropriate CSV header.
+  opcode_id = request.GET.get('runtime')
+  sensor_id = request.GET.get('sensor_id')
+  datas = cache.get(str(sensor_id) +'-' + str(opcode_id))
+  print(datas)
   response = HttpResponse(content_type='text/csv')
-  #response['Content-Disposition'] = 'attachment; filename=OutData.csv'
+
+  response['Content-Disposition'] = 'attachment; filename=WaveletData' + str(opcode_id) + '-' + str(sensor_id)
  
   # Create the CSV writer using the HttpResponse as the "file."
   writer = csv.writer(response)
-  writer.writerow(['Year', 'Unruly Airline Passengers'])
-  for (year, num) in zip(range(1995, 2006), UNRULY_PASSENGERS):
-    writer.writerow([year, num])
+  writer.writerow(['WaveletData'])
+  for data in datas:  
+      writer.writerow([str(data)])
  
   return response
 
@@ -980,40 +1037,49 @@ def getWaveletDataToCsv(request):
 import json
 from django.core.cache import cache
 
+from django.core.mail import send_mail
+ 
 
 @require_websocket
 def recTemHumSmogSocket(request):
     Info = None
-    while True:
-        message = request.websocket.wait()   
-        if not message is None:
-            Info = json.loads(message)
-
-        #RaspId = Info.id
-        RaspId = 'rs01'
-        #print(message)
-        if not Info is None:
-            for key,value in Info.items():
-                cache.set( RaspId+':'+key , json.dumps(value),timeout=None)
-            save = TemHumConData.objects.create(TemValue= Info['temperature'],HumValue=Info['humidity'], ConValue=Info['concentration'])
-            save.save()
+    RaspId = 'rs01'
+    try:
+        cache.set(RaspId+':Live1', 1,timeout=None)
+        while True:
+            message = request.websocket.wait()   
+            if not message is None:
+                Info = json.loads(message)
+    
+            #RaspId = Info.id
+            #print(message)
+            if not Info is None:
+                for key,value in Info.items():
+                    cache.set( RaspId+':'+key , json.dumps(value),timeout=None)
+                save = TemHumConData.objects.create(TemValue= Info['temperature'],HumValue=Info['humidity'], ConValue=Info['concentration'])
+                save.save()
+    except:
+        cache.set(RaspId+':Live1', 0,timeout=None)
  
     
 @require_websocket
 def recRaspInfoSocket(request):
     Info = None
-    while True:
-        message = request.websocket.wait()
-        
-        if not message is None:
-            Info = json.loads(message)
-           
-        
-        #RaspId = Info.id
-        RaspId = 'rs01'
-        if not Info is None:
-            for key,value in Info.items():
-                cache.set(RaspId+':'+key, json.dumps(value),timeout=None)
+    RaspId = 'rs01'
+    try:
+        cache.set(RaspId+':Live2', 1,timeout=None)
+        while True:
+            message = request.websocket.wait()
+            
+            if not message is None:
+                Info = json.loads(message)
+            #RaspId = Info.id
+            
+            if not Info is None:
+                for key,value in Info.items():
+                    cache.set(RaspId+':'+key, json.dumps(value),timeout=None)
+    except:
+        cache.set(RaspId+':Live2', 0,timeout=None)
 
        
 @require_websocket
@@ -1025,13 +1091,17 @@ def sentTemHumSmogSocket(request):
     
     data = {}
     RaspId = 'rs01'
-    while True:
-        for i in range(len(key)):    
-            data[key[i]]=json.loads(cache.get(RaspId+':'+key[i]))
-        
-        message = str(json.dumps(data)).encode(encoding="utf-8")
-        request.websocket.send(message)
-        time.sleep(1)
+    live = cache.get(RaspId+':Live1')
+    if live ==1:
+        while True:
+            for i in range(len(key)):    
+                data[key[i]]=json.loads(cache.get(RaspId+':'+key[i]))
+            
+            message = str(json.dumps(data)).encode(encoding="utf-8")
+            request.websocket.send(message)
+            time.sleep(1)
+    else:
+        pass
 
 @require_websocket
 def sentRaspInfoSocket(request):
@@ -1041,14 +1111,17 @@ def sentRaspInfoSocket(request):
     key = ['datetime','user','IP','cpuInfo','MemoryInfo','IOInfo','HardDiskInfo','OsVer']
     data = {}
     RaspId = 'rs01'
-    while True:
-        for i in range(len(key)):    
-            data[key[i]]=json.loads(cache.get(RaspId+':'+key[i]))
-        
-        message = str(json.dumps(data)).encode(encoding="utf-8")
-        request.websocket.send(message)
-        time.sleep(1)
-   
+    live = cache.get(RaspId+':Live2')
+    if live ==1:
+        while True:
+            for i in range(len(key)):    
+                data[key[i]]=json.loads(cache.get(RaspId+':'+key[i]))
+            
+            message = str(json.dumps(data)).encode(encoding="utf-8")
+            request.websocket.send(message)
+            time.sleep(1)
+    else:
+        pass
 ##############################################################
 # DATA API
 
@@ -1103,7 +1176,6 @@ def addRaspInfo(request):
     
 # DEL A RASP INFO
 # 
-
 def delRaspInfo(request):
     arr = {"code":200,"msg":"上位机删除成功！","data":{}}
     
@@ -1125,6 +1197,7 @@ def delRaspInfo(request):
         arr['code'] = 500
         arr['msg'] = "请求方式错误，需POST方法"
         return JsonResponse(arr,safe=False)
+
     
 # Get last ID IN RaspInfo
 
@@ -1147,3 +1220,296 @@ def getLastIDInRaspInfo(request):
         arr['msg'] = "请求方式错误，需POST方法"
         return JsonResponse(arr,safe=False)
     
+    
+# SEND BACK FACTORY INFO DATA
+#
+# {"code":0,"msg":"","count":1000,"data":[
+# {} 
+#]}
+
+def getFactoryInfo(request):
+    
+    arr = {"code":0,"msg":"","count":0,"data":[]}
+    
+    page = request.GET['page']
+    limit = request.GET['limit']
+    
+  
+    Allinfo = factory.objects.all()
+    arr['count'] = len(Allinfo)
+    for info in Allinfo[(int(page)-1)*int(limit):int(page)*int(limit)]:
+        arr['data'].append({"factorID":info.factorID,"factorDes":info.factorDes,"location":info.location,"personInCharge":info.personInCharge,"saveDate":info.saveDate,"phoneNumber":info.phoneNumber})
+    
+    return JsonResponse(arr,safe=False)    
+
+
+# ADD A Factory INFO
+# 
+
+def addFactoryInfo(request):
+    arr = {"code":200,"msg":"上位机信息添加成功！","data":{}}
+    
+    if request.method == "POST" and request.POST:
+
+        factorID = request.POST['factorID']
+        factorDes = request.POST['factorDes']
+        location = request.POST['location']
+        personInCharge = request.POST['personInCharge']
+        phoneNumber = request.POST['phoneNumber']
+        otherInfo = request.POST['otherInfo']
+        
+        
+        info = factory.objects.create(factorID=factorID,factorDes=factorDes,location=location,personInCharge=personInCharge,phoneNumber=phoneNumber,otherInfo=otherInfo)
+        info.save()
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 500
+        arr['msg'] = "请求方式错误，需POST方法"
+        return JsonResponse(arr,safe=False)
+
+# DEL A Factory INFO
+
+def delFactoryInfo(request):
+    arr = {"code":200,"msg":"上位机删除成功！","data":{}}
+    
+    if request.method == "POST" and request.POST:
+
+        factorID = request.POST['factorID']
+        
+        try:
+            
+            factory.objects.filter(factorID=factorID).delete()
+        except:
+            arr['code'] = 500
+            arr['msg'] = "删除出错！"
+            return JsonResponse(arr,safe=False)
+        
+        else:    
+            return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 500
+        arr['msg'] = "请求方式错误，需POST方法"
+        return JsonResponse(arr,safe=False)
+    
+
+
+# Get last ID IN FactoryInfo
+
+def getLastIDInFactoryInfo(request):
+    arr = {"code":200,"msg":"获取编号成功！","data":{}}
+    if request.method == "POST":
+        ID = 0
+        info = factory.objects.last()
+        if info is None:
+            ID = 1
+        else:
+            ID = info.factorID + 1
+            
+        arr['data']['ID'] = ID
+        print(ID)
+           
+        return JsonResponse(arr,safe=False)
+    else:
+        arr['code'] = 500
+        arr['msg'] = "请求方式错误，需POST方法"
+        return JsonResponse(arr,safe=False)
+
+
+# SEND BACK Sensor INFO DATA
+#
+# {"code":0,"msg":"","count":1000,"data":[
+# {} 
+#]}
+
+def getSensorInfo(request):
+    
+    arr = {"code":0,"msg":"","count":0,"data":[]}
+    
+    page = request.GET['page']
+    limit = request.GET['limit']
+    
+  
+    Allinfo = Sensor.objects.all()
+    arr['count'] = len(Allinfo)
+    for info in Allinfo[(int(page)-1)*int(limit):int(page)*int(limit)]:
+        arr['data'].append({"SensorDes":info.SensorDes,"SensorType":info.get_SensorType_display(),"SensorKey":info.SensorKey,"otherInfo":info.otherInfo,"saveDate":info.saveDate,"productDepart":info.productDepart.__str__()})
+    
+    return JsonResponse(arr,safe=False)    
+
+
+# Get ALL Sensor history DATA
+
+# ({"pointStart":1230764400000,"pointInterval":3600000,"dataLength":0,"data":[]})
+# pointStart 开始时间
+# piontInterval 间隔时间
+# dataLength 数据长度
+# data
+
+def gen_dates(b_date, days):
+    day = datetime.timedelta(days=1)
+    for i in range(days):
+        yield b_date + day*i
+
+def get_date_list(start=None, end=None):
+    """
+    获取日期列表
+    :param start: 开始日期
+    :param end: 结束日期
+    :return:
+    """
+    if start is None:
+        start = datetime.datetime.strptime("2000-01-01", "%Y-%m-%d")
+    if end is None:
+        end = datetime.datetime.now() + datetime.timedelta(days=2)
+    data = []
+    for d in gen_dates(start, (end-start).days):
+        data.append(d)
+    #print(data)
+    #print(datetime.datetime.now())
+    return data
+
+
+def getSensorHisData(request):
+    starttime = datetime.datetime.now()
+    arr = ({"pointStart":0,"pointInterval":3600000,"dataLength":0,"data":{'Tem':[],'Hum':[],'Con':[]}})
+    
+    Allinfo = TemHumConData.objects.all()
+    allinfo = TemHumConData.objects.extra(select={'year':'year(saveDate)','month':'month(saveDate)','day':'day(saveDate)','hour':'hour(saveDate)'}).values('year','month','day','hour').annotate(TemAvg=Avg('TemValue'),HumAvg=Avg('HumValue'),ConAvg=Avg('ConValue'))
+    
+    Tem = []
+    Hum = []
+    Con = []
+    TemDate = []
+    
+    for info in allinfo:
+        TemDate.append({'date':str(info['year'])+'-'+str(info['month'])+'-'+str(info['day'])+' '+str(info['hour']),'TemAvg':round(info['TemAvg'],2),'HumAvg':round(info['HumAvg'],2),'ConAvg':round(info['ConAvg'],2)})
+            
+    if Allinfo.exists() and allinfo.exists():
+        startDate = ((Allinfo[0].saveDate.replace(minute=0, second=0, microsecond=0)))
+        arr['pointStart'] = (int((Allinfo[0].saveDate.replace(minute=0, second=0, microsecond=0) +datetime.timedelta(hours=8) ).timestamp())*1000)
+        fisrtHour = int(Allinfo[0].saveDate.strftime("%H"))
+        
+        days = get_date_list(start=startDate)
+        #print(days)
+        #list_iterator
+        TemDate_iter = iter(TemDate)
+        begin = TemDate_iter.__next__()
+
+        for day in days:
+
+            if day.strftime("%Y-%-m-%-d") == begin['date'].split(" ")[0]:
+                
+                for i in [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,0]:
+                    
+                    if i == int(begin['date'].split(" ")[1]):
+                        Tem.append(begin['TemAvg'])
+                        Hum.append(begin['HumAvg'])
+                        Con.append(begin['ConAvg'])
+                        try:
+                            begin = TemDate_iter.__next__()
+                        except StopIteration:
+                            pass
+                    else:
+                        Tem.append(None)
+                        Hum.append(None)
+                        Con.append(None)
+                        
+            else:
+                Tem += [None]*24
+                Hum += [None]*24
+                Con += [None]*24       
+    endtime = datetime.datetime.now()
+    print((endtime - starttime).seconds)
+    arr['data']['Tem'] = Tem[fisrtHour-1:]
+    arr['data']['Hum'] = Hum[fisrtHour-1:]
+    arr['data']['Con'] = Con[fisrtHour-1:]
+    
+    return JsonResponse(arr,safe=False)
+
+def getEveryMonthData(request):
+    arr = {"code":0,"msg":"发送成功！","data":{'date':[],'TemAvg':[0,0,0,0,0,0,0,0,0,0,0,0],'HumAvg':[0,0,0,0,0,0,0,0,0,0,0,0]}}
+    date = 2018
+    arr['data']['date'] = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
+    allinfo = TemHumConData.objects.extra(select={'year':'year(saveDate)','month':'month(saveDate)'}).values('year','month').annotate(TemAvg=Avg('TemValue'),HumAvg=Avg('HumValue')).filter(saveDate__year=date)
+    
+    for info in allinfo:
+        arr['data']['TemAvg'][info['month']-1]=(round(info['TemAvg'],2))
+        arr['data']['HumAvg'][info['month']-1]=(round(info['HumAvg'],2))
+        
+    return JsonResponse(arr,safe=False)
+
+
+
+def getPersentData(request):
+    arr = {"code":0,"msg":"发送成功！","data":{"Tem":[['极高温', 0],['高温', 0],{'name': '舒适','y': 0,'sliced': 'true','selected': 'true' },['寒冷', 0]],"Hum":[['潮湿', 0],{'name': '舒适','y': 0,'sliced': 'true','selected': 'true' },['干燥', 0]]}}
+    TemHigh, TemFix, TemLow = 35,28,10
+    HumHigh, HumFix = 40,30
+
+    date = 2018
+    allinfo = TemHumConData.objects.extra(select={'year':'year(saveDate)','month':'month(saveDate)','day':'day(saveDate)'}).values('year','month','day').annotate(TemAvg=Avg('TemValue'),HumAvg=Avg('HumValue')).filter(saveDate__year=date)
+    
+    for info in allinfo:
+        if info['TemAvg'] > TemHigh:
+            arr['data']['Tem'][0][1]+=1
+        elif info['TemAvg'] > TemFix:
+            arr['data']['Tem'][1][1]+=1
+        elif info['TemAvg'] > TemLow:
+            arr['data']['Tem'][2]['y']+=1
+        else:
+            arr['data']['Tem'][3][1]+=1
+        print(info['HumAvg'])       
+        if info['HumAvg'] > HumHigh:
+            arr['data']['Hum'][0][1]+=1
+        elif info['HumAvg'] > HumFix:
+            arr['data']['Hum'][1]['y']+=1
+        else:
+            arr['data']['Hum'][2][1]+=1
+        
+        
+    return JsonResponse(arr,safe=False)
+    
+def getReport(date = 2018):
+    data = {"code":0,"msg":"发送成功！","data":[{'title':'气温分布占比','Content':''},{'title':'湿度分布占比','Content':''},{'title':'','Content':''}]}
+    date = 2018
+    TemHigh, TemFix, TemLow = 35,28,10
+    HumHigh, HumFix = 40,30
+    arr = {'Tem':[0,0,0,0],'Hum':[0,0,0]}
+    allinfo = TemHumConData.objects.extra(select={'year':'year(saveDate)','month':'month(saveDate)','day':'day(saveDate)'}).values('year','month','day').annotate(TemAvg=Avg('TemValue'),HumAvg=Avg('HumValue')).filter(saveDate__year=date)
+    
+    for info in allinfo:
+        if info['TemAvg'] > TemHigh:
+            arr['Tem'][0]+=1
+        elif info['TemAvg'] > TemFix:
+            arr['Tem'][1]+=1
+        elif info['TemAvg'] > TemLow:
+            arr['Tem'][2]+=1
+        else:
+            arr['Tem'][3]+=1
+      
+        if info['HumAvg'] > HumHigh:
+            arr['Hum'][0]+=1
+        elif info['HumAvg'] > HumFix:
+            arr['Hum'][1]+=1
+        else:
+            arr['Hum'][2]+=1
+     
+        
+    TemIndex,HumIndex = arr['Tem'].index(max(arr['Tem'])),arr['Hum'].index(max(arr['Hum']))
+    
+    if TemIndex == 0:
+        data['data'][0]['Content']+='极高温天气占比较多，长时间高温能使人体感到不适，工作效率降低，中暑、患肠道疾病和心脑血管等病症的发病率增多。\n需要提醒工人们多喝水。夏季缺水，会使体温太高，容易中暑。\n同时应该加装空调，或降低空调的运行温度，使工人们工作环境更加舒适。'
+    elif TemIndex == 1:
+        data['data'][0]['Content']+='高温天气占比较多，温度较高能使工人们体感到不适，大大降低了工人们的工作效率。\n需调整空调的运行温度，使工人们工作环境更加舒适。'
+    elif TemIndex == 2:
+        data['data'][0]['Content']+='舒适程度占比较高。工作环境比较舒适，舒适的温度可以使工人们提高工作效率。\n如果维持这种工作环境，工人满意度会提高，可以留住更多人为我司工作。'
+    elif TemIndex == 3:
+        data['data'][0]['Content']+='寒冷占比较高，寒冷天气来袭。\n考虑应为加装暖气等制暖措施！'
+        
+            
+    if HumIndex == 0:
+        data['data'][1]['Content']+='潮湿环境占比比较高。\n长时间潮湿环境能使人体感到不适，工作效率降低。\n潮湿环境对结核病、肾脏病、风湿性关节炎、慢性腰腿痛等病患者都有不良的影响，影响工人们的身体健康。'
+    elif HumIndex == 1:
+        data['data'][1]['Content']='舒适程度占比较高。\n工作环境比较舒适，舒适的温度可以使工人们提高工作效率。'
+    elif HumIndex == 2:
+        data['data'][1]['Content']+='干燥环境占比较高。\n干燥的空气具有一定的危害。首先是易造成细菌的传播。干燥的空气是造成灰尘、悬浮颗粒物飘浮增多的主要原因，而细菌不能单独存在，往往依附于灰尘之上。'
+    return data

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+  <meta charset="utf-8"> {% load staticfiles %}
+  <title>小波分解</title>
+  <meta name="renderer" content="webkit">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+  <link rel="stylesheet" href="{% static 'layuiadmin/layui/css/layui.css' %}" media="all">
+  <link rel="stylesheet" href="{% static 'layuiadmin/style/admin.css' %}" media="all">
+  <script src="{% static 'highcharts/code/highcharts.js' %}"></script>
+  <script src="{% static 'jquery-3.2.1.min.js' %}"></script>
+  <script src="{% static 'highcharts/code/modules/exporting.js' %}"></script>
+  <script src="{% static 'highcharts/code/modules/boost.js' %}"></script>
+</head>
+
+<body>
+
+  <style>
+    /* 这段样式只是用于演示 */
+
+    #LAY-component-grid-all .layui-card-body {
+      display: flex;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      height: 200px;
+    }
+  </style>
+
+  <div class="layui-fluid" id="LAY-component-grid-all">
+
+    <div class="layui-row layui-col-space10">
+
+      <div class="layui-col-xs12 layui-col-sm12 layui-col-md9 layui-col-md-offset1">
+        <form class="layui-form">
+          <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
+          <div class="layui-form-item">
+            <div class="layui-input-inline">
+              <select name="sensor" id="all-select-Sensor" lay-verify="required" lay-filter="sensor">
+                <option value="">请选择传感器!</option>
+              </select>
+            </div>
+
+            <label class="layui-form-label">时间范围</label>
+            <div class="layui-input-inline">
+              <input type="text" class="layui-input" id="test10" placeholder=" - " lay-filter="uploadDate">
+            </div>
+
+          </div>
+
+        </form>
+
+      </div>
+
+      <div class="layui-col-xs12 layui-col-sm12 layui-col-md2 ">
+        <button type="button" class="layui-btn" id="test1">
+          <i class="layui-icon">&#xe67c;</i>数据上传
+        </button>
+      </div>
+
+      <div class="layui-col-md12">
+        <div class="layui-card">
+          <div class="layui-card-header">数据预览</div>
+          <div class="layui-card-body layadmin-takerates">
+            <table class="layui-table" lay-data="{height: 'full-200',url:'api/getFactoryInfo', page:true, id:'idTest'}" lay-filter="demo">
+              <thead>
+                <tr>
+                  <th lay-data="{field:'factorID', width:110 ,  sort: true, fixed: true}">制造工厂ID</th>
+                  <th lay-data="{field:'factorDes'}">制造工厂描述</th>
+                  <th lay-data="{field:'location',event: 'ViewLocation', style:'cursor: pointer;'}">地址</th>
+                  <th lay-data="{field:'personInCharge', width:90,sort: true}">负责人</th>
+                  <th lay-data="{field:'phoneNumber',width:150, sort: true}">电话</th>
+                  <th lay-data="{field:'saveDate', sort: true, fixed: 'right'}">添加日期</th>
+                  <th lay-data="{fixed: 'right', align:'center', toolbar: '#barDemo'}"></th>
+                </tr>
+              </thead>
+            </table>
+
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
+
+  <script>
+    layer = layui.layer;
+    layui.config({
+      base: "{% static 'layuiadmin/' %}" //静态资源所在路径
+    }).extend({
+      index: 'lib/index' //主入口模块
+    }).use(['index', 'upload', 'table', 'laydate'], function () {
+      var $ = layui.$
+      var laydate = layui.laydate;
+      var upload = layui.upload;
+
+      //执行实例
+      var uploadInst = upload.render({
+        elem: '#test1' //绑定元素
+        , url: '/upload/' //上传接口
+        , done: function (res) {
+          //上传完毕回调
+        }
+        , error: function () {
+          //请求异常回调
+        }
+      });
+
+      //日期时间范围
+      laydate.render({
+        elem: '#test10'
+        , type: 'datetime'
+        , range: true
+      });
+
+      var table = layui.table;
+      //监听表格复选框选择
+      table.on('checkbox(demo)', function (obj) {
+        console.log(obj)
+      });
+
+      //监听工具条
+      table.on('tool(demo)', function (obj) {
+        var data = obj.data;
+        if (obj.event === 'ViewLocation') {
+          layer.msg(data.location, {
+            time: 20000, //20s后自动关闭
+            btn: ['明白了'],
+            offset: 'auto'
+          });
+        }
+        if (obj.event === 'detail') {
+          layer.msg('地址：' + data.location + '');
+        } else if (obj.event === 'del') {
+          layer.confirm('真的删除行么', function (index) {
+            factorID = data.factorID;
+            obj.del();
+
+            $.ajax({
+              type: 'POST',
+              url: '/api/delFactoryInfo',
+              data: {
+                factorID: factorID
+              },
+              success: function (data) {
+                layer.msg(data.msg);
+              }
+            });
+
+            layer.close(index);
+
+          });
+        } else if (obj.event === 'edit') {
+          layer.alert('编辑行：<br>' + JSON.stringify(data))
+        }
+      });
+
+    });
+
+  </script>
+  <script>
+    function getQueryString() {
+      var qs = location.search.substr(1), // 获取url中"?"符后的字串  
+        args = {}, // 保存参数数据的对象
+        items = qs.length ? qs.split("&") : [], // 取得每一个参数项,
+        item = null,
+        len = items.length;
+
+      for (var i = 0; i < len; i++) {
+        item = items[i].split("=");
+        var name = decodeURIComponent(item[0]),
+          value = decodeURIComponent(item[1]);
+        if (name) {
+          args[name] = value;
+        }
+      }
+      return args;
+    }
+
+
+
+  </script>
+  <script>
+
+    layui.use('form', function () {
+      var form = layui.form;
+      //监听传感器选择下拉框，改变则重新获取数据
+
+      var datetime;
+      form.on('select(datetime)', function (datetimeID) {
+        datetime = datetimeID.value;
+      })
+
+      form.on('select(sensor)', function (sensorID) {
+        layer.load();
+        var url = "/dealWaveletData/?";
+        url += "sensor_id=";
+        url += sensorID.value;
+        url += "&runtime=";
+        url += datetime;
+      });
+
+      
+    });
+
+  </script>
+
+
+
+</body>
+
+</html>

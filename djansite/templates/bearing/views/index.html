@@ -4,7 +4,7 @@
 <head>
 
   <meta charset="utf-8"> {% load staticfiles %}
-  <title>工控平台中心 - Admin</title>
+  <title>数据采集平台 - Admin</title>
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
@@ -36,14 +36,6 @@
         </ul>
         <ul class="layui-nav layui-layout-right" lay-filter="layadmin-layout-right">
 
-          <li class="layui-nav-item" lay-unselect>
-            <a lay-href="/appMessage/" layadmin-event="message" lay-text="消息中心">
-              <i class="layui-icon layui-icon-notice"></i>
-
-              <!-- 如果有新消息，则显示小圆点 -->
-              <span class="layui-badge-dot"></span>
-            </a>
-          </li>
           <li class="layui-nav-item layui-hide-xs" lay-unselect>
             <a href="javascript:;" layadmin-event="theme">
               <i class="layui-icon layui-icon-theme"></i>
@@ -88,8 +80,8 @@
       <!-- 侧边菜单 -->
       <div class="layui-side layui-side-menu">
         <div class="layui-side-scroll">
-          <div class="layui-logo" lay-href="home/console.html">
-            <span>工控平台中心</span>
+          <div class="layui-logo" lay-href="/console">
+            <span>数据采集平台</span>
           </div>
 
           <ul class="layui-nav layui-nav-tree" lay-shrink="all" id="LAY-system-side-menu" lay-filter="layadmin-system-side-menu">
@@ -100,7 +92,10 @@
               </a>
               <dl class="layui-nav-child">
                 <dd data-name="console" class="layui-this">
-                  <a lay-href="home/console.html">控制台</a>
+                  <a lay-href="/console">控制台</a>
+                </dd>
+                <dd data-name="version">
+                  <a lay-href="/version">版本更新线</a>
                 </dd>
               </dl>
             </li>
@@ -114,10 +109,10 @@
                   <a href="javascript:;">实时数据</a>
                   <dl class="layui-nav-child">
                     <dd data-name="list">
-                      <a lay-href="/envriDashboard/">车间环境实时数据</a>
+                      <a lay-href="/envriDashboard">车间环境实时数据</a>
                     </dd>
                     <dd data-name="list">
-                      <a lay-href="/raspiDashboard/">树莓派运行数据</a>
+                      <a lay-href="/raspiDashboard">树莓派运行数据</a>
                     </dd>
                   </dl>
                 </dd>
@@ -125,10 +120,10 @@
                   <a href="javascript:;">历史数据</a>
                   <dl class="layui-nav-child">
                     <dd data-name="grid">
-                      <a lay-href="javascript:;">车间环境数据</a>
+                      <a lay-href="/HisEnvriDashboard">车间环境历史数据</a>
                     </dd>
                     <dd data-name="grid">
-                      <a lay-href="javascript:;">树莓派运行数据</a>
+                      <a lay-href="/HisRaspiDashboard">树莓派运行数据</a>
                     </dd>
 
                   </dl>
@@ -138,51 +133,45 @@
             <li data-name="component" class="layui-nav-item">
               <a href="javascript:;" lay-tips="组件" lay-direction="2">
                 <i class="layui-icon layui-icon-component"></i>
-                <cite>数据处理</cite>
+                <cite>数据预处理</cite>
               </a>
               <dl class="layui-nav-child">
                 <dd data-name="grid">
-                  <a href="javascript:;">数据去噪</a>
-                  <dl class="layui-nav-child">
-                    <dd data-name="list">
-                      <a lay-href="/GridWaveletsmooth/" id="Wavelet" data-method="Wavelet">小波去噪</a>
-                    </dd>
-
-                  </dl>
+                  <a lay-href="/upLoadData" id="uploadData" data-method="uploadData" >数据上传</a>
+                </dd>
+                <dd data-name="grid">
+                  <a lay-href="/GridWaveletsmooth/" id="Wavelet" data-method="Wavelet">小波去噪</a>
                 </dd>
               </dl>
             </li>
             <li data-name="component" class="layui-nav-item">
-                <a href="javascript:;" lay-tips="组件" lay-direction="2">
-                  <i class="layui-icon layui-icon-app"></i>
-                  <cite>数据统计分析</cite>
-                </a>
-                <dl class="layui-nav-child">
-                  <dd data-name="grid">
-                    <a lay-href="/analysisData">热力图</a>
+              <a href="javascript:;" lay-tips="组件" lay-direction="2">
+                <i class="layui-icon layui-icon-app"></i>
+                <cite>数据统计分析</cite>
+              </a>
+              <dl class="layui-nav-child">
+                <dd data-name="grid">
+                  <a lay-href="/analysisData">热力图</a>
 
-                  </dd>
-                  <dd data-name="grid">
-                    <a lay-href="/MaxMinData">峰值分布</a>
-                    
-                  </dd>
-                  <dd data-name="grid">
-                    <a lay-href="/Workheatmap">车间动态热力图</a>
-                  </dd>
-                </dl>
-              </li>
+                </dd>
+                <dd data-name="grid">
+                  <a lay-href="/MaxMinData">峰值分布</a>
+
+                </dd>
+                <dd data-name="grid">
+                  <a lay-href="/analysis">分析报告</a>
+                </dd>
+              </dl>
+            </li>
             <li data-name="app" class="layui-nav-item">
               <a href="javascript:;" lay-tips="应用" lay-direction="2">
                 <i class="layui-icon layui-icon-app"></i>
-                <cite>MES数据中心</cite>
+                <cite>制造数据中心</cite>
               </a>
               <dl class="layui-nav-child">
                 <dd data-name="grid">
                   <a href="javascript:;">实时数据</a>
                   <dl id="mesLiveData" class="layui-nav-child">
-                    <dd data-name="list">
-                      <a lay-href="/all/">广州-MES</a>
-                    </dd>
 
                   </dl>
                 </dd>
@@ -207,19 +196,20 @@
                   <a lay-href="/ManageRasp">树莓派管理</a>
 
                 </dd>
-                <dd data-name="grid">
-                  <a lay-href="javascript:;">车间管理</a>
-                  
-                </dd>
+
                 <dd data-name="grid">
                   <a lay-href="/ManageFactory">工厂管理</a>
+                </dd>
+                <dd data-name="grid">
+                  <a lay-href="/ManageSensor">传感器管理</a>
+
                 </dd>
               </dl>
             </li>
             <li data-name="user" class="layui-nav-item">
               <a href="javascript:;" lay-tips="用户" lay-direction="2">
                 <i class="layui-icon layui-icon-user"></i>
-                <cite>用户</cite>
+                <cite>用户管理</cite>
               </a>
               <dl class="layui-nav-child">
                 <dd>
@@ -258,12 +248,6 @@
                     </dd>
                     <dd>
                       <a lay-href="/setUserPassword/">修改密码</a>
-                    </dd>
-                    <dd>
-                      <a lay-href="/raspiDashboard/">测试标签</a>
-                    </dd>
-                    <dd>
-                      <a lay-href="/envriDashboard/">测试标签2</a>
                     </dd>
                   </dl>
                 </dd>
@@ -308,7 +292,7 @@
       <!-- 主体内容 -->
       <div class="layui-body" id="LAY_app_body">
         <div class="layadmin-tabsbody-item layui-show">
-          <iframe src="/home/" frameborder="0" class="layadmin-iframe"></iframe>
+          <iframe src="/console" frameborder="0" class="layadmin-iframe"></iframe>
         </div>
       </div>
 
@@ -319,14 +303,14 @@
 
   <script src="{% static 'layuiadmin/layui/layui.js' %}"></script>
   <script>
-    var machineID,runTimeID;
+    var machineID, runTimeID;
     layui.config({
       base: "{% static 'layuiadmin/' %}" //静态资源所在路径
     }).extend({
       index: 'lib/index' //主入口模块
     }).use(['index', 'layer'], function () { //独立版的layer无需执行这一句
       var $ = layui.jquery, layer = layui.layer; //独立版的layer无需执行这一句
-      
+
       //触发事件
       var active = {
         Wavelet: function () {
@@ -343,10 +327,32 @@
             yes: function (index, layero) {
               var iframe = $(window.parent.document).find(".layui-show > iframe");
               url = '/GridWaveletsmooth/?machineID=' + machineID;
-              iframe.length == 1 ? $(iframe).attr("src",url) : window.parent.location.reload();
+              iframe.length == 1 ? $(iframe).attr("src", url) : window.parent.location.reload();
               layer.closeAll();
             },
-            btn2: function(index, layero){
+            btn2: function (index, layero) {
+              layer.closeAll();
+            }
+          });
+        },
+        uploadData: function () {
+          var that = this;
+          //多窗口模式，层叠置顶
+          layer.open({
+            type: 2,
+            title: '选择所要上传数据的工厂/部门/机器',
+            area: ['800px', '200px'],
+            fixed: false, //不固定
+            maxmin: true,
+            content: '/upLoadDataFrame',
+            btn: ['提交', '关闭'],
+            yes: function (index, layero) {
+              var iframe = $(window.parent.document).find(".layui-show > iframe");
+              url = '/upLoadData/?machineID=' + machineID;
+              iframe.length == 1 ? $(iframe).attr("src", url) : window.parent.location.reload();
+              layer.closeAll();
+            },
+            btn2: function (index, layero) {
               layer.closeAll();
             }
           });
@@ -354,6 +360,11 @@
       };
 
       $('#Wavelet').on('click', function () {
+        var othis = $(this), method = othis.data('method');
+        active[method] ? active[method].call(this, othis) : '';
+      });
+      
+      $('#uploadData').on('click', function () {
         var othis = $(this), method = othis.data('method');
         active[method] ? active[method].call(this, othis) : '';
       });

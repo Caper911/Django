@@ -26,15 +26,14 @@
         <div class="layui-row layui-col-space15">
             <div>
                 <form class="layui-form" action="">
-                    <div class="layui-col-md2">
+                    <div class="layui-col-md2 layui-col-md-offset8">
                         <select name="year" lay-filter="YearMonDay">
-                            <option value="">请选择按年/月/日统计</option>
+                            <option value="">请选择按年/月统计</option>
                             <option value="year">按年统计</option>
                             <option value="month">按月统计</option>
-                            <option value="day">按日统计</option>
                         </select>
                     </div>
-                    <div class="layui-col-md1 layui-col-md-offset1">
+                    <div class="layui-col-md1">
                         <select name="Date" lay-filter="Date" id="date">
                             <option value="">选择日期</option>
                         </select>
@@ -120,7 +119,7 @@
                                 text: '月最高/低气温'
                             },
                             subtitle: {
-                                text: '数据来源: WorldClimate.com'
+                                text: '数据来源: 车间数据采集'
                             },
                             xAxis: {
                                 categories: data.data.date
@@ -154,7 +153,7 @@
                                 text: '日最高/低湿度'
                             },
                             subtitle: {
-                                text: '数据来源: WorldClimate.com'
+                                text: '数据来源: 车间数据采集'
                             },
                             xAxis: {
                                 categories: data.data.date
@@ -206,7 +205,7 @@
                 text: '月平均气温'
             },
             subtitle: {
-                text: '数据来源: WorldClimate.com'
+                text: '数据来源: 车间数据采集'
             },
             xAxis: {
                 categories: dat
@@ -240,7 +239,7 @@
                 text: '日平均湿度'
             },
             subtitle: {
-                text: '数据来源: WorldClimate.com'
+                text: '数据来源: 车间数据采集'
             },
             xAxis: {
                 categories: ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月']
